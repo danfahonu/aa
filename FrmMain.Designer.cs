@@ -38,6 +38,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnBaoCaoXuatKho = new System.Windows.Forms.Button();
             this.btnBaoCaoNhapKho = new System.Windows.Forms.Button();
             this.pnlNghiepVuSubMenu = new System.Windows.Forms.Panel();
+            this.btnYeuCauNhapKho = new System.Windows.Forms.Button(); // <--- DÒNG MỚI
             this.btnChamCong = new System.Windows.Forms.Button();
             this.btnBaoGia = new System.Windows.Forms.Button();
             this.btnPhieuChi = new System.Windows.Forms.Button();
@@ -215,7 +216,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.pnlBaoCaoSubMenu.Controls.Add(this.btnBaoCaoXuatKho);
             this.pnlBaoCaoSubMenu.Controls.Add(this.btnBaoCaoNhapKho);
             this.pnlBaoCaoSubMenu.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlBaoCaoSubMenu.Location = new System.Drawing.Point(0, 680);
+            this.pnlBaoCaoSubMenu.Location = new System.Drawing.Point(0, 720); // <--- SỬA (từ 680 -> 720)
             this.pnlBaoCaoSubMenu.Name = "pnlBaoCaoSubMenu";
             this.pnlBaoCaoSubMenu.Size = new System.Drawing.Size(180, 320);
             this.pnlBaoCaoSubMenu.TabIndex = 3;
@@ -358,6 +359,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             // 
             // pnlNghiepVuSubMenu
             // 
+            this.pnlNghiepVuSubMenu.Controls.Add(this.btnYeuCauNhapKho); // <--- SỬA (thêm dòng này)
             this.pnlNghiepVuSubMenu.Controls.Add(this.btnChamCong);
             this.pnlNghiepVuSubMenu.Controls.Add(this.btnBaoGia);
             this.pnlNghiepVuSubMenu.Controls.Add(this.btnPhieuChi);
@@ -367,8 +369,25 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.pnlNghiepVuSubMenu.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlNghiepVuSubMenu.Location = new System.Drawing.Point(0, 440);
             this.pnlNghiepVuSubMenu.Name = "pnlNghiepVuSubMenu";
-            this.pnlNghiepVuSubMenu.Size = new System.Drawing.Size(180, 240);
+            this.pnlNghiepVuSubMenu.Size = new System.Drawing.Size(180, 280); // <--- SỬA (từ 240 -> 280)
             this.pnlNghiepVuSubMenu.TabIndex = 2;
+            // 
+            // btnYeuCauNhapKho
+            // 
+            this.btnYeuCauNhapKho.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnYeuCauNhapKho.FlatAppearance.BorderSize = 0;
+            this.btnYeuCauNhapKho.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnYeuCauNhapKho.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnYeuCauNhapKho.ForeColor = System.Drawing.Color.Gainsboro;
+            this.btnYeuCauNhapKho.Location = new System.Drawing.Point(0, 240); // <--- SỬA (vị trí mới 6*40=240)
+            this.btnYeuCauNhapKho.Name = "btnYeuCauNhapKho";
+            this.btnYeuCauNhapKho.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnYeuCauNhapKho.Size = new System.Drawing.Size(180, 40);
+            this.btnYeuCauNhapKho.TabIndex = 6; // <--- SỬA (tab index mới)
+            this.btnYeuCauNhapKho.Text = "Yêu cầu Nhập kho";
+            this.btnYeuCauNhapKho.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnYeuCauNhapKho.UseVisualStyleBackColor = true;
+            this.btnYeuCauNhapKho.Click += new System.EventHandler(this.btnYeuCauNhapKho_Click);
             // 
             // btnChamCong
             // 
@@ -793,5 +812,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         private System.Windows.Forms.ToolStripStatusLabel staTime;
         private System.Windows.Forms.Panel pnlNavIndicator;
         private System.Windows.Forms.ToolTip toolTipInfo;
+        private System.Windows.Forms.Button btnYeuCauNhapKho; // <--- DÒNG MỚI
     }
 }

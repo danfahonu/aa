@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Configuration;
 using DoAnLapTrinhQuanLy.GuiLayer;
 
+// Đổi namespace này cho khớp với project của bà (ví dụ: StoreGearVN)
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FrmMain : Form
@@ -90,10 +91,13 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         private void ShowBaoCaoKho(string reportType)
         {
             _currentForm?.Close();
-            var newForm = new FormBaoCaoKho(reportType) { TopLevel = false, FormBorderStyle = FormBorderStyle.None, Dock = DockStyle.Fill };
-            panelMain.Controls.Add(newForm);
-            _currentForm = newForm;
-            newForm.Show();
+            // Đảm bảo FormBaoCaoKho có constructor nhận reportType
+            // var newForm = new FormBaoCaoKho(reportType) { TopLevel = false, FormBorderStyle = FormBorderStyle.None, Dock = DockStyle.Fill };
+            // panelMain.Controls.Add(newForm);
+            // _currentForm = newForm;
+            // newForm.Show();
+
+            // Tạm thời comment lại nếu FormBaoCaoKho chưa được refactor
         }
         #endregion
 
@@ -129,6 +133,12 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     btnNghiepVu.Visible = true;
                     btnBaoCao.Visible = true;
                     break;
+                default: // Thêm case default để khóa an toàn
+                    btnHeThong.Visible = false;
+                    btnDanhMuc.Visible = false;
+                    btnNghiepVu.Visible = false;
+                    btnBaoCao.Visible = false;
+                    break;
             }
 
             // Phân quyền cho các nút trong menu con
@@ -146,6 +156,12 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
             btnNhapKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho");
             btnXuatKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh");
+
+            // === DÒNG MỚI TÍCH HỢP (Phần 1: Logic phân quyền) ===
+            // (Giả sử btnYeuCauNhapKho là ID của nút bà mới tạo)
+            btnYeuCauNhapKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho");
+            // === KẾT THÚC DÒNG MỚI ===
+
             btnBaoGia.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh");
             btnPhieuThu.Visible = (userRole == "Administrator" || userRole == "Kế toán");
             btnPhieuChi.Visible = (userRole == "Administrator" || userRole == "Kế toán");
@@ -259,6 +275,12 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         private void btnPhieuChi_Click(object sender, EventArgs e) => ShowForm<FormPhieuChi>();
         private void btnBaoGia_Click(object sender, EventArgs e) => ShowForm<FormBangBaoGia>();
         private void btnChamCong_Click(object sender, EventArgs e) => ShowForm<FormTamUngChamCong>();
+
+        // === DÒNG MỚI TÍCH HỢP (Phần 2: Sự kiện Click) ===
+        // Bà nhớ liên kết sự kiện Click của nút btnYeuCauNhapKho với hàm này
+        private void btnYeuCauNhapKho_Click(object sender, EventArgs e) => ShowForm<FormYeuCauNhapKho>();
+        // === KẾT THÚC DÒNG MỚI ===
+
         private void btnBaoCaoNhapKho_Click(object sender, EventArgs e) => ShowBaoCaoKho("NHAP");
         private void btnBaoCaoXuatKho_Click(object sender, EventArgs e) => ShowBaoCaoKho("XUAT");
         private void btnBaoCaoTonKho_Click(object sender, EventArgs e) => ShowForm<FormBaoCaoTonKho>();

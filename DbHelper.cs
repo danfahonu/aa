@@ -227,5 +227,30 @@ namespace DoAnLapTrinhQuanLy.Data
                 }
             }
         }
+
+        // Lấy chuỗi kết nối từ App.config
+        private static string GetConnectionString()
+        {
+            return ConfigurationManager.ConnectionStrings["Db"].ConnectionString;
+        }
+
+        // === HÀM CŨ CỦA BÀ (TRẢ VỀ SỐ DÒNG ẢNH HƯỞNG) ===
+        
+
+        // === HÀM MỚI (TRẢ VỀ 1 GIÁ TRỊ DUY NHẤT) ===
+        public static object ExecuteScalar(string sql, params SqlParameter[] parameters)
+        {
+            using (var connection = new SqlConnection(GetConnectionString()))
+            {
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddRange(parameters);
+                    connection.Open();
+                    return command.ExecuteScalar();
+                }
+            }
+        }
+
+        // Hàm tiện ích để tạo tham số
     }
 }

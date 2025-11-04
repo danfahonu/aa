@@ -13,5 +13,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         public string MatKhau { get; set; } // Giữ lại mật khẩu để dùng cho chức năng đổi mật khẩu
         public string HoTen { get; set; }
         public string TenQuyen { get; set; }
+        public string MaNV { get; set; } // === THÊM DÒNG NÀY ===
     }
 }

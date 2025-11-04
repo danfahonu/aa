@@ -3,11 +3,10 @@ using System.Data;
 using System.Windows.Forms;
 using DoAnLapTrinhQuanLy.Data;
 
-namespace DoAnLapTrinhQuanLy.GuiLayer
+namespace DoAnLapTrinhQuanLy.GuiLayer // (Giữ namespace của bà)
 {
     public partial class FormDangNhap : Form
     {
-        // Property để Program.cs có thể lấy thông tin user sau khi đăng nhập thành công
         public UserData AuthenticatedUser { get; private set; }
 
         public FormDangNhap()
@@ -17,7 +16,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void btnThoat_Click(object sender, EventArgs e)
         {
-            // Nút thoát sẽ kết thúc toàn bộ ứng dụng
             Application.Exit();
         }
 
@@ -34,8 +32,9 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
             try
             {
+                // === SỬA QUERY: Thêm nd.MANV vào ===
                 string query = @"
-                    SELECT nd.TAIKHOAN, nd.MATKHAU, nd.HOTEN, qh.TENQUYEN 
+                    SELECT nd.TAIKHOAN, nd.MATKHAU, nd.HOTEN, nd.MANV, qh.TENQUYEN 
                     FROM NGUOIDUNG nd 
                     JOIN QUYENHAN qh ON nd.MAQUYEN = qh.MAQUYEN 
                     WHERE nd.TAIKHOAN = @TaiKhoan AND nd.MATKHAU = @MatKhau AND nd.HOATDONG = 1";
@@ -52,13 +51,14 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                         TaiKhoan = row["TAIKHOAN"].ToString(),
                         MatKhau = row["MATKHAU"].ToString(),
                         HoTen = row["HOTEN"].ToString(),
-                        TenQuyen = row["TENQUYEN"].ToString()
+                        TenQuyen = row["TENQUYEN"].ToString(),
+                        MaNV = row["MANV"].ToString() // === THÊM DÒNG NÀY ===
                     };
 
                     // === LƯU VÀO SESSION ===
                     Session.LoggedInUser = this.AuthenticatedUser;
 
-                    this.DialogResult = DialogResult.OK; // Báo cho Program.cs là đăng nhập thành công
+                    this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
                 else
@@ -74,10 +74,9 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
         {
-            // Nếu checkbox được check, bỏ ký tự che mật khẩu. Nếu không, đặt lại.
             if (chkShowPassword.Checked)
             {
-                txtMatKhau.PasswordChar = '\0'; // Ký tự null để hiển thị text
+                txtMatKhau.PasswordChar = '\0';
             }
             else
             {
