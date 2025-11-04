@@ -1,22 +1,13 @@
-using DoAnLapTrinhQuanLy.Data;
 using System;
 using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
+using DoAnLapTrinhQuanLy.Data;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FormTamUngChamCong : Form
     {
-        private enum FormMode { View, Edit, New }
-        private FormMode _currentMode = FormMode.View;
-
-        // Cờ để ngăn các sự kiện bị gọi lại chồng chéo
-        private bool _isBusy = false;
-
-        private BindingSource _bsNhanVien = new BindingSource();
-        private BindingSource _bsTamUng = new BindingSource();
-        private BindingSource _bsChamCong = new BindingSource();
-
         public FormTamUngChamCong()
         {
             InitializeComponent();
@@ -24,221 +15,202 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormTamUngChamCong_Load(object sender, EventArgs e)
         {
+            LoadComboBoxNhanVien();
+            numThang.Value = DateTime.Now.Month;
+            numNam.Value = DateTime.Now.Year;
+            LoadDataChamCong();
+            LoadDataTamUng();
+            SetInputMode(false);
+        }
+
+        #region Xử lý dữ liệu và ComboBox
+
+        private void LoadComboBoxNhanVien()
+        {
             try
             {
-                LoadNhanVienData();
-                LoadLookups();
-
-                // Gán sự kiện
-                gridNhanVien.SelectionChanged += gridNhanVien_SelectionChanged;
-                tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
-
-                // Tải dữ liệu ban đầu
-                if (_bsNhanVien.Count > 0)
-                {
-                    _bsNhanVien.Position = 0;
-                }
-                else
-                {
-                    SetFormMode(FormMode.View);
-                }
+                string query = "SELECT MANV, HOTEN FROM NHANVIEN WHERE HOATDONG = 1";
+                DataTable dt = DbHelper.Query(query);
+                cboNhanVien.DataSource = dt;
+                cboNhanVien.DisplayMember = "HOTEN";
+                cboNhanVien.ValueMember = "MANV";
+                cboNhanVien.SelectedIndex = -1;
             }
-            catch (Exception ex) { MessageBox.Show("Lỗi khởi tạo: " + ex.Message, "Lỗi"); }
-        }
-
-        #region Tải Dữ Liệu
-
-        void LoadNhanVienData()
-        {
-            _bsNhanVien.DataSource = DbHelper.Query("SELECT MANV, HOTEN FROM dbo.NHANVIEN ORDER BY HOTEN");
-            gridNhanVien.DataSource = _bsNhanVien;
-            gridNhanVien.Columns["MANV"].HeaderText = "Mã NV";
-            gridNhanVien.Columns["HOTEN"].HeaderText = "Họ Tên";
-            gridNhanVien.AutoResizeColumns();
-        }
-
-        void LoadLookups()
-        {
-            for (int i = 1; i <= 12; i++) cboThang.Items.Add(i);
-        }
-
-        void LoadTabData()
-        {
-            if (_bsNhanVien.Current == null) return;
-            string selectedMaNV = ((DataRowView)_bsNhanVien.Current)["MANV"].ToString();
-
-            if (tabControl.SelectedTab == tabTamUng)
+            catch (Exception ex)
             {
-                var dt = DbHelper.Query("SELECT ID, NGAY, SOTIEN, GHICHU FROM dbo.TAMUNG WHERE MANV = @MANV ORDER BY NGAY DESC", DbHelper.Param("@MANV", selectedMaNV));
-                dt.Columns["ID"].AllowDBNull = true;
-                _bsTamUng.DataSource = dt;
-                gridTamUng.DataSource = _bsTamUng;
+                MessageBox.Show("Lỗi tải danh sách nhân viên: " + ex.Message);
             }
-            else if (tabControl.SelectedTab == tabChamCong)
+        }
+
+        private void LoadDataChamCong()
+        {
+            try
             {
-                var dt = DbHelper.Query("SELECT ID, THANG, NAM, NGAYCONG, GHICHU FROM dbo.BANGCHAMCONG WHERE MANV = @MANV ORDER BY NAM DESC, THANG DESC", DbHelper.Param("@MANV", selectedMaNV));
-                dt.Columns["ID"].AllowDBNull = true;
-                _bsChamCong.DataSource = dt;
-                gridChamCong.DataSource = _bsChamCong;
+                string query = @"
+                    SELECT bc.ID, nv.HOTEN, bc.THANG, bc.NAM, bc.NGAYCONG, bc.GHICHU 
+                    FROM BANGCHAMCONG bc
+                    JOIN NHANVIEN nv ON bc.MANV = nv.MANV
+                    WHERE bc.THANG = @Thang AND bc.NAM = @Nam";
+                DataTable dt = DbHelper.Query(query,
+                                    DbHelper.Param("@Thang", numThang.Value),
+                                    DbHelper.Param("@Nam", numNam.Value));
+                dgvChamCong.DataSource = dt;
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải dữ liệu chấm công: " + ex.Message);
+            }
+        }
+
+        private void LoadDataTamUng()
+        {
+            try
+            {
+                string query = @"
+                    SELECT tu.ID, nv.HOTEN, tu.NGAY, tu.SOTIEN, tu.GHICHU
+                    FROM TAMUNG tu
+                    JOIN NHANVIEN nv ON tu.MANV = nv.MANV
+                    WHERE MONTH(tu.NGAY) = @Thang AND YEAR(tu.NGAY) = @Nam";
+                DataTable dt = DbHelper.Query(query,
+                                    DbHelper.Param("@Thang", numThang.Value),
+                                    DbHelper.Param("@Nam", numNam.Value));
+                dgvTamUng.DataSource = dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải dữ liệu tạm ứng: " + ex.Message);
+            }
+        }
+
+        private void ClearInputs()
+        {
+            cboNhanVien.SelectedIndex = -1;
+            numNgayCong.Value = 0;
+            txtGhiChuCC.Text = "";
+            numSoTien.Value = 0;
+            txtGhiChuTU.Text = "";
         }
 
         #endregion
 
-        #region Quản lý trạng thái Form
+        #region Quản lý trạng thái giao diện (UX)
 
-        private void SetFormMode(FormMode mode)
+        private void SetInputMode(bool enable)
         {
-            _currentMode = mode;
-            bool isEditing = (mode != FormMode.View);
+            btnLuu.Enabled = enable;
+            btnHuy.Enabled = enable;
+            btnThem.Enabled = !enable;
 
-            // Bật/tắt các ô nhập liệu tùy theo tab đang active
-            if (tabControl.SelectedTab == tabTamUng)
-            {
-                dtpNgayTU.Enabled = isEditing;
-                numSoTienTU.Enabled = isEditing;
-                txtGhiChuTU.ReadOnly = !isEditing;
-            }
-            else
-            {
-                cboThang.Enabled = isEditing;
-                txtNam.ReadOnly = !isEditing;
-                numNgayCong.Enabled = isEditing;
-                txtGhiChuCC.ReadOnly = !isEditing;
-            }
+            gbChamCong.Enabled = enable;
+            gbTamUng.Enabled = enable;
+            cboNhanVien.Enabled = enable;
 
-            // Bật/tắt các nút của cả 2 tab
-            btnMoiTU.Enabled = !isEditing;
-            btnSuaTU.Enabled = !isEditing && _bsTamUng.Current != null;
-            btnLuuTU.Enabled = isEditing;
-            btnXoaTU.Enabled = !isEditing && _bsTamUng.Current != null;
-            btnMoiCC.Enabled = !isEditing;
-            btnSuaCC.Enabled = !isEditing && _bsChamCong.Current != null;
-            btnLuuCC.Enabled = isEditing;
-            btnXoaCC.Enabled = !isEditing && _bsChamCong.Current != null;
-
-            // Bật/tắt các thành phần điều hướng chính
-            gridNhanVien.Enabled = !isEditing;
-            tabControl.Enabled = !isEditing;
+            numThang.Enabled = !enable;
+            numNam.Enabled = !enable;
+            btnXem.Enabled = !enable;
         }
 
         #endregion
 
-        #region Sự kiện Controls
+        #region Sự kiện
 
-        // *** HÀM CHÍNH ĐỂ XỬ LÝ VIỆC "ĐƠ" ***
-        private void UpdateDetailView()
+        private void btnThem_Click(object sender, EventArgs e)
         {
-            if (_isBusy) return; // Nếu đang bận, không làm gì cả để tránh vòng lặp
-
-            _isBusy = true; // Báo hiệu là tôi đang bận
-
-            LoadTabData();
-            SetFormMode(FormMode.View);
-
-            _isBusy = false; // Xử lý xong, hết bận
+            ClearInputs();
+            SetInputMode(true);
+            cboNhanVien.Focus();
         }
 
-        private void gridNhanVien_SelectionChanged(object sender, EventArgs e)
+        private void btnXem_Click(object sender, EventArgs e)
         {
-            UpdateDetailView();
+            LoadDataChamCong();
+            LoadDataTamUng();
         }
 
-        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        private void btnLuu_Click(object sender, EventArgs e)
         {
-            UpdateDetailView();
-        }
+            if (cboNhanVien.SelectedValue == null)
+            {
+                MessageBox.Show("Vui lòng chọn một nhân viên.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-        // --- Nút Tạm Ứng ---
-        private void btnMoiTU_Click(object sender, EventArgs e)
-        {
-            if (_bsNhanVien.Current == null) return;
-            _bsTamUng.AddNew();
-            dtpNgayTU.Value = DateTime.Today;
-            SetFormMode(FormMode.New);
-            dtpNgayTU.Focus();
-        }
-        private void btnSuaTU_Click(object sender, EventArgs e) { if (_bsTamUng.Current != null) SetFormMode(FormMode.Edit); }
-
-        private void btnLuuTU_Click(object sender, EventArgs e)
-        {
-            if (numSoTienTU.Value <= 0) { MessageBox.Show("Số tiền phải lớn hơn 0."); return; }
             try
             {
-                var currentNV = ((DataRowView)_bsNhanVien.Current)["MANV"].ToString();
-                if (_currentMode == FormMode.New)
+                bool daLuu = false;
+                // Xử lý lưu Chấm công
+                if (numNgayCong.Value > 0)
                 {
-                    DbHelper.Execute("INSERT INTO dbo.TAMUNG(MANV, NGAY, SOTIEN, GHICHU) VALUES(@MANV, @NGAY, @SOTIEN, @GHICHU)",
-                        DbHelper.Param("@MANV", currentNV), DbHelper.Param("@NGAY", dtpNgayTU.Value.Date),
-                        DbHelper.Param("@SOTIEN", numSoTienTU.Value), DbHelper.Param("@GHICHU", txtGhiChuTU.Text.Trim()));
+                    object existingId = DbHelper.Scalar(@"
+                        SELECT ID FROM BANGCHAMCONG 
+                        WHERE MANV = @MaNV AND THANG = @Thang AND NAM = @Nam",
+                        DbHelper.Param("@MaNV", cboNhanVien.SelectedValue),
+                        DbHelper.Param("@Thang", numThang.Value),
+                        DbHelper.Param("@Nam", numNam.Value)
+                    );
+
+                    if (existingId != null)
+                    {
+                        DbHelper.Execute(@"
+                            UPDATE BANGCHAMCONG SET NGAYCONG = @NgayCong, GHICHU = @GhiChu 
+                            WHERE ID = @ID",
+                            DbHelper.Param("@NgayCong", numNgayCong.Value),
+                            DbHelper.Param("@GhiChu", txtGhiChuCC.Text),
+                            DbHelper.Param("@ID", existingId)
+                        );
+                    }
+                    else
+                    {
+                        DbHelper.Execute(@"
+                            INSERT INTO BANGCHAMCONG (MANV, THANG, NAM, NGAYCONG, GHICHU)
+                            VALUES (@MaNV, @Thang, @Nam, @NgayCong, @GhiChu)",
+                            DbHelper.Param("@MaNV", cboNhanVien.SelectedValue),
+                            DbHelper.Param("@Thang", numThang.Value),
+                            DbHelper.Param("@Nam", numNam.Value),
+                            DbHelper.Param("@NgayCong", numNgayCong.Value),
+                            DbHelper.Param("@GhiChu", txtGhiChuCC.Text)
+                        );
+                    }
+                    daLuu = true;
+                }
+
+                // Xử lý lưu Tạm ứng
+                if (numSoTien.Value > 0)
+                {
+                    DbHelper.Execute(@"
+                        INSERT INTO TAMUNG (MANV, NGAY, SOTIEN, GHICHU)
+                        VALUES (@MaNV, @Ngay, @SoTien, @GhiChu)",
+                        DbHelper.Param("@MaNV", cboNhanVien.SelectedValue),
+                        DbHelper.Param("@Ngay", DateTime.Now.Date),
+                        DbHelper.Param("@SoTien", numSoTien.Value),
+                        DbHelper.Param("@GhiChu", txtGhiChuTU.Text)
+                    );
+                    daLuu = true;
+                }
+
+                if (daLuu)
+                {
+                    MessageBox.Show("Lưu dữ liệu thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadDataChamCong();
+                    LoadDataTamUng();
+                    SetInputMode(false);
                 }
                 else
                 {
-                    var id = ((DataRowView)_bsTamUng.Current)["ID"];
-                    DbHelper.Execute("UPDATE dbo.TAMUNG SET NGAY=@NGAY, SOTIEN=@SOTIEN, GHICHU=@GHICHU WHERE ID=@ID",
-                        DbHelper.Param("@NGAY", dtpNgayTU.Value.Date), DbHelper.Param("@SOTIEN", numSoTienTU.Value),
-                        DbHelper.Param("@GHICHU", txtGhiChuTU.Text.Trim()), DbHelper.Param("@ID", id));
+                    MessageBox.Show("Bạn chưa nhập ngày công hoặc số tiền tạm ứng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
-                UpdateDetailView();
             }
-            catch (Exception ex) { MessageBox.Show("Lỗi khi lưu: " + ex.Message); }
-        }
-
-        private void btnXoaTU_Click(object sender, EventArgs e)
-        {
-            if (_bsTamUng.Current != null && MessageBox.Show("Xóa?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            catch (Exception ex)
             {
-                try { DbHelper.Execute("DELETE FROM dbo.TAMUNG WHERE ID=@ID", DbHelper.Param("@ID", ((DataRowView)_bsTamUng.Current)["ID"])); UpdateDetailView(); }
-                catch (Exception ex) { MessageBox.Show("Lỗi khi xóa: " + ex.Message); }
+                MessageBox.Show("Lỗi khi lưu dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void btnNapTU_Click(object sender, EventArgs e) => UpdateDetailView();
 
-        // --- Nút Chấm Công ---
-        private void btnMoiCC_Click(object sender, EventArgs e)
+        private void btnHuy_Click(object sender, EventArgs e)
         {
-            if (_bsNhanVien.Current == null) return;
-            _bsChamCong.AddNew();
-            cboThang.Text = DateTime.Today.Month.ToString();
-            txtNam.Text = DateTime.Today.Year.ToString();
-            SetFormMode(FormMode.New);
-            numNgayCong.Focus();
+            ClearInputs();
+            SetInputMode(false);
         }
-        private void btnSuaCC_Click(object sender, EventArgs e) { if (_bsChamCong.Current != null) SetFormMode(FormMode.Edit); }
-
-        private void btnLuuCC_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var currentNV = ((DataRowView)_bsNhanVien.Current)["MANV"].ToString();
-                if (_currentMode == FormMode.New)
-                {
-                    DbHelper.Execute("INSERT INTO dbo.BANGCHAMCONG(MANV, THANG, NAM, NGAYCONG, GHICHU) VALUES(@MANV, @THANG, @NAM, @NGAYCONG, @GHICHU)",
-                        DbHelper.Param("@MANV", currentNV), DbHelper.Param("@THANG", cboThang.Text), DbHelper.Param("@NAM", txtNam.Text),
-                        DbHelper.Param("@NGAYCONG", numNgayCong.Value), DbHelper.Param("@GHICHU", txtGhiChuCC.Text.Trim()));
-                }
-                else
-                {
-                    var id = ((DataRowView)_bsChamCong.Current)["ID"];
-                    DbHelper.Execute("UPDATE dbo.BANGCHAMCONG SET THANG=@THANG, NAM=@NAM, NGAYCONG=@NGAYCONG, GHICHU=@GHICHU WHERE ID=@ID",
-                        DbHelper.Param("@THANG", cboThang.Text), DbHelper.Param("@NAM", txtNam.Text),
-                        DbHelper.Param("@NGAYCONG", numNgayCong.Value), DbHelper.Param("@GHICHU", txtGhiChuCC.Text.Trim()),
-                        DbHelper.Param("@ID", id));
-                }
-                UpdateDetailView();
-            }
-            catch (Exception ex) { MessageBox.Show("Lỗi khi lưu: " + ex.Message); }
-        }
-
-        private void btnXoaCC_Click(object sender, EventArgs e)
-        {
-            if (_bsChamCong.Current != null && MessageBox.Show("Xóa?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                try { DbHelper.Execute("DELETE FROM dbo.BANGCHAMCONG WHERE ID=@ID", DbHelper.Param("@ID", ((DataRowView)_bsChamCong.Current)["ID"])); UpdateDetailView(); }
-                catch (Exception ex) { MessageBox.Show("Lỗi khi xóa: " + ex.Message); }
-            }
-        }
-        private void btnNapCC_Click(object sender, EventArgs e) => UpdateDetailView();
 
         #endregion
     }

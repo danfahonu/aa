@@ -1,14 +1,20 @@
 using System;
-using System.Configuration;
+using System.Drawing;
 using System.Windows.Forms;
-using System.Collections.Generic;
+using System.Configuration;
+using DoAnLapTrinhQuanLy.GuiLayer;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FrmMain : Form
     {
+        // === BIẾN KẾ THỪA TỪ CODE CŨ ===
         private UserData _loggedInUser;
         private Form _currentForm;
+
+        // === BIẾN MỚI CHO UI HIỆN ĐẠI ===
+        private Button _currentNavButton;
+        private Panel _activeSubMenuPanel;
 
         public FrmMain()
         {
@@ -17,6 +23,12 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
+            // Thiết lập vị trí ban đầu cho thanh chỉ báo (indicator)
+            pnlNavIndicator.Height = btnDashboard.Height;
+            pnlNavIndicator.Top = btnDashboard.Top;
+            pnlNavIndicator.Left = 0;
+
+            // === HIỂN THỊ THÔNG TIN STATUS STRIP (Kế thừa) ===
             try
             {
                 var cs = ConfigurationManager.ConnectionStrings["Db"]?.ConnectionString ?? "(chưa cấu hình)";
@@ -29,18 +41,42 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             timer.Tick += (s, a) => staTime.Text = DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy");
             timer.Start();
 
-            // Ẩn cây chức năng ban đầu và hiển thị Dashboard
-            treeChucNang.Nodes.Clear();
+            // Ẩn các menu con khi mới load
+            pnlSubMenu.Visible = false;
+            pnlHeThongSubMenu.Visible = false;
+            pnlDanhMucSubMenu.Visible = false;
+            pnlNghiepVuSubMenu.Visible = false;
+            pnlBaoCaoSubMenu.Visible = false;
+
+            // Thiết lập mô tả cho các nút (Tooltip)
+            SetupTooltips();
+
+            // Mở Dashboard làm form mặc định
+            ActivateButton(btnDashboard);
             ShowForm<FormDashboard>();
         }
 
+        // === PHƯƠI THỨC MỚI ĐỂ QUẢN LÝ TOOLTIP ===
+        private void SetupTooltips()
+        {
+            toolTipInfo.SetToolTip(btnDashboard, "Trang chủ - Hiển thị tổng quan");
+            toolTipInfo.SetToolTip(btnHeThong, "Hệ thống - Quản lý và cài đặt");
+            toolTipInfo.SetToolTip(btnDanhMuc, "Danh mục - Quản lý các đối tượng");
+            toolTipInfo.SetToolTip(btnNghiepVu, "Nghiệp vụ - Các hoạt động chính");
+            toolTipInfo.SetToolTip(btnBaoCao, "Báo cáo - Xem và in ấn số liệu");
+        }
+
+        // === KẾ THỪA HOÀN TOÀN TỪ CODE CŨ ===
         public void SetLoggedInUser(UserData user)
         {
             _loggedInUser = user;
             staUser.Text = "User: " + (_loggedInUser != null ? $"{_loggedInUser.HoTen} ({_loggedInUser.TenQuyen})" : "(chưa đăng nhập)");
-            ApplyPermissions();
+
+            // ÁP DỤNG PHÂN QUYỀN CHO GIAO DIỆN MỚI
+            ApplyNavigationPermissions();
         }
 
+        #region Kế thừa các phương thức mở Form
         private void ShowForm<T>() where T : Form, new()
         {
             if (_currentForm != null && _currentForm.GetType() == typeof(T)) { _currentForm.BringToFront(); return; }
@@ -51,8 +87,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             newForm.Show();
         }
 
-
-
         private void ShowBaoCaoKho(string reportType)
         {
             _currentForm?.Close();
@@ -61,17 +95,15 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             _currentForm = newForm;
             newForm.Show();
         }
+        #endregion
 
-        private void ApplyPermissions()
+        // === NÂNG CẤP TỪ ApplyPermissions() VÀ BuildTreeView() ===
+        private void ApplyNavigationPermissions()
         {
             if (_loggedInUser == null) return;
+            string userRole = _loggedInUser.TenQuyen;
 
-            btnHeThong.Visible = false;
-            btnDanhMuc.Visible = false;
-            btnNghiepVu.Visible = false;
-            btnBaoCao.Visible = false;
-
-            switch (_loggedInUser.TenQuyen)
+            switch (userRole)
             {
                 case "Administrator":
                     btnHeThong.Visible = true;
@@ -80,189 +112,162 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     btnBaoCao.Visible = true;
                     break;
                 case "Kế toán":
+                    btnHeThong.Visible = false;
                     btnDanhMuc.Visible = true;
                     btnNghiepVu.Visible = true;
                     btnBaoCao.Visible = true;
                     break;
                 case "Nhân viên Kinh doanh":
+                    btnHeThong.Visible = false;
                     btnDanhMuc.Visible = true;
                     btnNghiepVu.Visible = true;
                     btnBaoCao.Visible = true;
                     break;
                 case "Nhân viên Kho":
+                    btnHeThong.Visible = false;
                     btnDanhMuc.Visible = true;
                     btnNghiepVu.Visible = true;
                     btnBaoCao.Visible = true;
                     break;
             }
-            btnHeThong_Click(this, EventArgs.Empty);
+
+            // Phân quyền cho các nút trong menu con
+            btnQuanLyHeThong.Visible = (userRole == "Administrator");
+            btnCaiDat.Visible = (userRole == "Administrator");
+            btnKetNoiCSDL.Visible = (userRole == "Administrator");
+
+            btnHangHoa.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh" || userRole == "Nhân viên Kho");
+            btnNhomHang.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh" || userRole == "Nhân viên Kho");
+            btnKhachHang.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh");
+            btnNhaCungCap.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho");
+            btnNhanVien.Visible = (userRole == "Administrator");
+            btnTaiKhoanNganHang.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+            btnHeThongTKKeToan.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+
+            btnNhapKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho");
+            btnXuatKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh");
+            btnBaoGia.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh");
+            btnPhieuThu.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+            btnPhieuChi.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+            btnChamCong.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+
+            btnBaoCaoNhapKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho");
+            btnBaoCaoXuatKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho");
+            btnBaoCaoTonKho.Visible = (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho");
+            btnBaoCaoQuy.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+            btnBaoCaoNhatKyChung.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+            btnBaoCaoSoChiTietTK.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+            btnBaoCaoCongNo.Visible = (userRole == "Administrator" || userRole == "Kế toán");
+            btnBaoCaoLuong.Visible = (userRole == "Administrator" || userRole == "Kế toán");
         }
 
-        private void BuildTreeView(string rootName)
+        #region Các phương thức tiện ích cho UI
+        private void ActivateButton(Button btnSender)
         {
-            treeChucNang.Nodes.Clear();
-            TreeNode root = null;
-            string userRole = _loggedInUser?.TenQuyen ?? "";
-
-            switch (rootName)
+            if (btnSender == null) return;
+            if (_currentNavButton != btnSender)
             {
-                case "Hệ Thống":
-                    var heThongNodes = new List<TreeNode>();
-                    heThongNodes.Add(new TreeNode("Dashboard (Trang chủ)") { Name = "sys.dashboard" });
-                    if (userRole == "Administrator")
-                    {
-                        heThongNodes.Add(new TreeNode("Quản lý Hệ thống") { Name = "sys.quanlyhethong" });
-                        heThongNodes.Add(new TreeNode("Cài đặt chung") { Name = "sys.caidat" });
-                        heThongNodes.Add(new TreeNode("Kết nối CSDL") { Name = "sys.ketnoi" });
-                    }
-                    heThongNodes.Add(new TreeNode("Thông tin phần mềm") { Name = "sys.about" });
-                    root = new TreeNode("Hệ Thống", heThongNodes.ToArray());
-                    break;
-
-                case "Danh Mục":
-                    var danhMucNodes = new List<TreeNode>();
-                    if (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh" || userRole == "Nhân viên Kho")
-                    {
-                        danhMucNodes.Add(new TreeNode("Hàng hóa - Vật tư") { Name = "dm.hanghoa" });
-                        danhMucNodes.Add(new TreeNode("Nhóm hàng") { Name = "dm.nhomhang" });
-                    }
-                    if (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh")
-                    {
-                        danhMucNodes.Add(new TreeNode("Khách hàng") { Name = "dm.khachhang" });
-                    }
-                    if (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho")
-                    {
-                        danhMucNodes.Add(new TreeNode("Nhà cung cấp") { Name = "dm.ncc" });
-                    }
-                    if (userRole == "Administrator")
-                    {
-                        danhMucNodes.Add(new TreeNode("Nhân viên") { Name = "dm.nhanvien" });
-                    }
-                    if (userRole == "Administrator" || userRole == "Kế toán")
-                    {
-                        danhMucNodes.Add(new TreeNode("Tài khoản Ngân hàng") { Name = "dm.tknh" });
-                        danhMucNodes.Add(new TreeNode("Hệ thống TK Kế toán") { Name = "dm.kt" });
-                    }
-                    root = new TreeNode("Danh Mục", danhMucNodes.ToArray());
-                    break;
-
-                case "Nghiệp Vụ":
-                    var nghiepVuNodes = new List<TreeNode>();
-                    if (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho")
-                    {
-                        nghiepVuNodes.Add(new TreeNode("Phiếu Nhập kho") { Name = "nv.nhapkho" });
-                    }
-                    if (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kinh doanh")
-                    {
-                        nghiepVuNodes.Add(new TreeNode("Phiếu Xuất kho") { Name = "nv.xuatkho" });
-                        nghiepVuNodes.Add(new TreeNode("Báo giá") { Name = "nv.baogia" });
-                    }
-                    if (userRole == "Administrator" || userRole == "Kế toán")
-                    {
-                        nghiepVuNodes.Add(new TreeNode("Phiếu Thu tiền") { Name = "nv.phieuthu" });
-                        nghiepVuNodes.Add(new TreeNode("Phiếu Chi tiền") { Name = "nv.phieuchi" });
-                        nghiepVuNodes.Add(new TreeNode("Chấm công & Tạm ứng") { Name = "nv.chamcong" });
-                    }
-                    root = new TreeNode("Nghiệp Vụ", nghiepVuNodes.ToArray());
-                    break;
-                case "Báo Cáo":
-                    var baoCaoNodes = new List<TreeNode>();
-                    if (userRole == "Administrator" || userRole == "Kế toán" || userRole == "Nhân viên Kho")
-                    {
-                        baoCaoNodes.Add(new TreeNode("Báo cáo Kho", new[]{
-                            new TreeNode("Báo cáo Nhập kho") { Name = "bc.nhapkho" },
-                            new TreeNode("Báo cáo Xuất kho") { Name = "bc.xuatkho" },
-                            new TreeNode("Tổng hợp Tồn kho") { Name = "bc.tonghopton" }
-                        }));
-                    }
-                    if (userRole == "Administrator" || userRole == "Kế toán")
-                    {
-                        baoCaoNodes.Add(new TreeNode("Báo cáo Quỹ", new[] { new TreeNode("Sổ quỹ") { Name = "bc.quy" } }));
-                        baoCaoNodes.Add(new TreeNode("Báo cáo Kế toán", new[] { new TreeNode("Sổ Nhật ký chung") { Name = "bc.nkc" }, new TreeNode("Sổ Chi tiết tài khoản") { Name = "bc.scttk" } }));
-                        baoCaoNodes.Add(new TreeNode("Báo cáo Công nợ", new[] { new TreeNode("Sổ chi tiết công nợ") { Name = "bc.cn" } }));
-                        baoCaoNodes.Add(new TreeNode("Báo cáo Nhân sự", new[] { new TreeNode("Bảng lương nhân viên") { Name = "bc.luong" } }));
-                    }
-                    root = new TreeNode("Báo Cáo", baoCaoNodes.ToArray());
-                    break;
-            }
-
-            if (root != null && root.Nodes.Count > 0)
-            {
-                treeChucNang.Nodes.Add(root);
-                root.ExpandAll();
-            }
-        }
-
-        private void btnHeThong_Click(object sender, EventArgs e) => BuildTreeView("Hệ Thống");
-        private void btnDanhMuc_Click(object sender, EventArgs e) => BuildTreeView("Danh Mục");
-        private void btnNghiepVu_Click(object sender, EventArgs e) => BuildTreeView("Nghiệp Vụ");
-        private void btnBaoCao_Click(object sender, EventArgs e) => BuildTreeView("Báo Cáo");
-
-        private void mHoiDapAI_Click(object sender, EventArgs e) => ShowForm<FormHoiDap>(); private void btnDoiMatKhau_Click(object sender, EventArgs e)
-        {
-            if (_loggedInUser == null) { MessageBox.Show("Vui lòng đăng nhập."); return; }
-            var f = new FormDoiMatKhau(_loggedInUser.ID, _loggedInUser.HoTen);
-            f.ShowDialog(this);
-        }
-
-        private void btnDangXuat_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                _currentForm?.Close();
-                this.Hide();
-                var loginForm = new FormDangNhap();
-                if (loginForm.ShowDialog() == DialogResult.OK)
+                if (_currentNavButton != null)
                 {
-                    this.SetLoggedInUser(loginForm.AuthenticatedUser);
-                    this.Show();
-                    ShowForm<FormDashboard>();
+                    _currentNavButton.BackColor = Color.FromArgb(26, 34, 56);
                 }
-                else
-                {
-                    Application.Exit();
-                }
+                _currentNavButton = btnSender;
+                pnlNavIndicator.Height = btnSender.Height;
+                pnlNavIndicator.Top = btnSender.Top;
+                btnSender.BackColor = Color.FromArgb(70, 81, 115);
+                pnlNavIndicator.Visible = true;
             }
         }
 
-        private void treeChucNang_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void navButton_Leave(object sender, EventArgs e)
         {
-            try
+            Button btn = sender as Button;
+            if (btn != _currentNavButton)
             {
-                switch (e.Node.Name)
-                {
-                    case "sys.dashboard": ShowForm<FormDashboard>(); break;
-                    case "sys.quanlyhethong": ShowForm<FormQuanLyHeThong>(); break;
-                    case "sys.caidat": ShowForm<FormCaiDatHeThong>(); break;
-                    case "sys.ketnoi": new FormKetNoiCSDL().ShowDialog(this); break;
-                    case "sys.about": new FormThongTinPhanMem().ShowDialog(this); break;
-                    case "dm.hanghoa": ShowForm<FormDanhMucHangHoa>(); break;
-                    case "dm.nhomhang": ShowForm<FormNhomHang>(); break;
-                    case "dm.khachhang": ShowForm<FormKhachHang>(); break;
-                    case "dm.ncc": ShowForm<FormNhaCungCap>(); break;
-                    case "dm.nhanvien": ShowForm<FormNhanVien>(); break;
-                    case "dm.tknh": ShowForm<FormQuanLyTaiKhoanNganHang>(); break;
-                    case "dm.kt": ShowForm<FormHeThongTaiKhoanKeToan>(); break;
-                    case "nv.nhapkho": ShowForm<FormPhieuNhap>(); break;
-                    case "nv.xuatkho": ShowForm<FormPhieuXuat>(); break;
-                    case "nv.phieuthu": ShowForm<FormPhieuThu>(); break;
-                    case "nv.phieuchi": ShowForm<FormPhieuChi>(); break;
-                    case "nv.baogia": ShowForm<FormBangBaoGia>(); break;
-                    case "nv.chamcong": ShowForm<FormTamUngChamCong>(); break;
-                    case "bc.nhapkho": ShowBaoCaoKho("NHAP"); break;
-                    case "bc.xuatkho": ShowBaoCaoKho("XUAT"); break;
-                    case "bc.tonghopton": ShowForm<FormBaoCaoTonKho>(); break;
-                    case "bc.quy": ShowForm<FormBaoCaoQuy>(); break;
-                    case "bc.nkc": ShowForm<FormSoNhatKyChung>(); break;
-                    case "bc.scttk": ShowForm<FormSoChiTietTaiKhoan>(); break;
-                    case "bc.cn": ShowForm<FormReportCongNo>(); break;
-                    case "bc.luong": ShowForm<FormTinhLuong>(); break;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi mở chức năng: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btn.BackColor = Color.FromArgb(26, 34, 56);
             }
         }
+
+        private void ShowSubMenu(Panel subMenu)
+        {
+            foreach (Control control in pnlSubMenu.Controls)
+            {
+                if (control is Panel && control != subMenu)
+                    control.Visible = false;
+            }
+
+            if (subMenu != null)
+            {
+                pnlSubMenu.Visible = !subMenu.Visible || _activeSubMenuPanel != subMenu;
+                subMenu.Visible = pnlSubMenu.Visible;
+            }
+            else
+            {
+                pnlSubMenu.Visible = false;
+            }
+            _activeSubMenuPanel = subMenu;
+        }
+        #endregion
+
+        #region Các sự kiện Click (Kế thừa logic từ treeChucNang_NodeMouseDoubleClick)
+
+        private void btnDashboard_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender as Button);
+            ShowSubMenu(null);
+            ShowForm<FormDashboard>();
+        }
+
+        private void btnHeThong_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender as Button);
+            ShowSubMenu(pnlHeThongSubMenu);
+        }
+
+        private void btnDanhMuc_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender as Button);
+            ShowSubMenu(pnlDanhMucSubMenu);
+        }
+
+        private void btnNghiepVu_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender as Button);
+            ShowSubMenu(pnlNghiepVuSubMenu);
+        }
+
+        private void btnBaoCao_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender as Button);
+            ShowSubMenu(pnlBaoCaoSubMenu);
+        }
+
+        private void btnQuanLyHeThong_Click(object sender, EventArgs e) => ShowForm<FormQuanLyHeThong>();
+        private void btnCaiDat_Click(object sender, EventArgs e) => ShowForm<FormCaiDatHeThong>();
+        private void btnKetNoiCSDL_Click(object sender, EventArgs e) => new FormKetNoiCSDL().ShowDialog(this);
+        private void btnAbout_Click(object sender, EventArgs e) => new FormThongTinPhanMem().ShowDialog(this);
+        private void btnHangHoa_Click(object sender, EventArgs e) => ShowForm<FormDanhMucHangHoa>();
+        private void btnNhomHang_Click(object sender, EventArgs e) => ShowForm<FormNhomHang>();
+        private void btnKhachHang_Click(object sender, EventArgs e) => ShowForm<FormKhachHang>();
+        private void btnNhaCungCap_Click(object sender, EventArgs e) => ShowForm<FormNhaCungCap>();
+        private void btnNhanVien_Click(object sender, EventArgs e) => ShowForm<FormNhanVien>();
+        private void btnTaiKhoanNganHang_Click(object sender, EventArgs e) => ShowForm<FormQuanLyTaiKhoanNganHang>();
+        private void btnHeThongTKKeToan_Click(object sender, EventArgs e) => ShowForm<FormHeThongTaiKhoanKeToan>();
+        private void btnNhapKho_Click(object sender, EventArgs e) => ShowForm<FormPhieuNhap>();
+        private void btnXuatKho_Click(object sender, EventArgs e) => ShowForm<FormPhieuXuat>();
+        private void btnPhieuThu_Click(object sender, EventArgs e) => ShowForm<FormPhieuThu>();
+        private void btnPhieuChi_Click(object sender, EventArgs e) => ShowForm<FormPhieuChi>();
+        private void btnBaoGia_Click(object sender, EventArgs e) => ShowForm<FormBangBaoGia>();
+        private void btnChamCong_Click(object sender, EventArgs e) => ShowForm<FormTamUngChamCong>();
+        private void btnBaoCaoNhapKho_Click(object sender, EventArgs e) => ShowBaoCaoKho("NHAP");
+        private void btnBaoCaoXuatKho_Click(object sender, EventArgs e) => ShowBaoCaoKho("XUAT");
+        private void btnBaoCaoTonKho_Click(object sender, EventArgs e) => ShowForm<FormBaoCaoTonKho>();
+        private void btnBaoCaoQuy_Click(object sender, EventArgs e) => ShowForm<FormBaoCaoQuy>();
+        private void btnBaoCaoNhatKyChung_Click(object sender, EventArgs e) => ShowForm<FormSoNhatKyChung>();
+        private void btnBaoCaoSoChiTietTK_Click(object sender, EventArgs e) => ShowForm<FormSoChiTietTaiKhoan>();
+        private void btnBaoCaoCongNo_Click(object sender, EventArgs e) => ShowForm<FormReportCongNo>();
+        private void btnBaoCaoLuong_Click(object sender, EventArgs e) => ShowForm<FormTinhLuong>();
+
+        #endregion
     }
 }

@@ -2,7 +2,6 @@ D:\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csproj.AssemblyReference.cache
 D:\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csproj.GenerateResource.cache
 D:\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csproj.CoreCompileInputs.cache
 D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormNhanVien.resources
-D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.UserData.resources
 D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDoiMatKhau.resources
 D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDanhMucHangHoa.resources
 D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormHeThongTaiKhoanKeToan.resources
@@ -138,3 +137,5 @@ D:\WindowsFormsApp2\bin\Debug\Mscc.GenerativeAI.Google.xml
 D:\WindowsFormsApp2\bin\Debug\Newtonsoft.Json.xml
 D:\WindowsFormsApp2\obj\Debug\StoreGearVN.exe.config
 D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormPhieuXuat.resources
+D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDashboard.resources
+D:\WindowsFormsApp2\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDangNhap.resources

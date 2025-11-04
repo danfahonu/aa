@@ -1,8 +1,7 @@
-﻿using DoAnLapTrinhQuanLy.Data;
-using System;
+﻿using System;
 using System.Data;
-using System.Globalization;
 using System.Windows.Forms;
+using DoAnLapTrinhQuanLy.Data;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
@@ -15,76 +14,61 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormBaoCaoTonKho_Load(object sender, EventArgs e)
         {
-            LoadData();
+            // Khi form load, chạy báo cáo ngay với bộ lọc mặc định
+            btnXemBaoCao_Click(sender, e);
         }
 
-        private void btnRefresh_Click(object sender, EventArgs e)
-        {
-            LoadData();
-        }
-
-        private void LoadData()
+        private void btnXemBaoCao_Click(object sender, EventArgs e)
         {
             try
             {
-                // Câu truy vấn này tổng hợp số lượng tồn và giá trị tồn kho từ bảng chi tiết
-                // Nó sẽ tính đúng giá trị tồn kho dựa trên giá nhập của từng lô hàng còn lại
-                string sql = @"
-                    SELECT
-                        hh.MAHH AS [Mã Hàng],
-                        hh.TENHH AS [Tên Hàng Hóa],
-                        hh.DVT AS [ĐVT],
-                        ISNULL(SUM(kct.SO_LUONG_TON), 0) AS [Số Lượng Tồn],
-                        ISNULL(SUM(kct.SO_LUONG_TON * kct.DON_GIA_NHAP), 0) AS [Giá Trị Tồn Kho]
-                    FROM
-                        dbo.DM_HANGHOA hh
+                // Câu query này sẽ không tự tính GIATRI_TON nữa để tránh lỗi
+                string query = @"
+                    SELECT 
+                        h.MAHH,
+                        h.TENHH,
+                        nh.TENNHOM,
+                        h.DVT,
+                        ISNULL(v.TON_HIEN_TAI, 0) AS TONKHO,
+                        h.GIAVON
+                    FROM 
+                        DM_HANGHOA h
+                    LEFT JOIN 
+                        DM_NHOMHANG nh ON h.MANHOM = nh.MANHOM
                     LEFT JOIN
-                        dbo.KHO_CHITIET_TONKHO kct ON hh.MAHH = kct.MAHH
-                    GROUP BY
-                        hh.MAHH, hh.TENHH, hh.DVT
-                    ORDER BY
-                        hh.TENHH;
-                ";
+                        vw_TonKhoHienTai v ON h.MAHH = v.MAHH
+                    ORDER BY 
+                        nh.TENNHOM, h.TENHH";
 
-                DataTable dt = DbHelper.Query(sql);
-                gridTonKho.DataSource = dt;
+                DataTable dt = DbHelper.Query(query);
 
-                // Tính tổng giá trị tồn kho và hiển thị lên StatusStrip
+                // === PHẦN SỬA LỖI QUAN TRỌNG NHẤT ===
+                // Thêm một cột mới 'GIATRI_TON' vào DataTable bằng code C#
+                dt.Columns.Add("GIATRI_TON", typeof(decimal));
+
                 decimal tongGiaTri = 0;
                 foreach (DataRow row in dt.Rows)
                 {
-                    tongGiaTri += Convert.ToDecimal(row["Giá Trị Tồn Kho"]);
+                    // Kiểm tra DBNull trước khi chuyển đổi kiểu dữ liệu
+                    decimal tonKho = (row["TONKHO"] == DBNull.Value) ? 0 : Convert.ToDecimal(row["TONKHO"]);
+                    decimal giaVon = (row["GIAVON"] == DBNull.Value) ? 0 : Convert.ToDecimal(row["GIAVON"]);
+
+                    decimal giaTriTon = tonKho * giaVon;
+
+                    // Gán giá trị vừa tính vào cột mới
+                    row["GIATRI_TON"] = giaTriTon;
+
+                    // Cộng dồn vào tổng giá trị
+                    tongGiaTri += giaTriTon;
                 }
 
-                CultureInfo culture = new CultureInfo("vi-VN");
-                staTongGiaTri.Text = $"Tổng giá trị tồn kho: {tongGiaTri.ToString("c", culture)}";
-
-                FormatGrid();
+                dgvBaoCao.DataSource = dt;
+                lblTongGiaTri.Text = tongGiaTri.ToString("N0") + " VNĐ";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi tải báo cáo tồn kho: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi xem báo cáo: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void FormatGrid()
-        {
-            // Định dạng cho các cột số và tiền tệ
-            var currencyFormat = new DataGridViewCellStyle { Format = "N0", Alignment = DataGridViewContentAlignment.MiddleRight };
-            var numberFormat = new DataGridViewCellStyle { Format = "N0", Alignment = DataGridViewContentAlignment.MiddleCenter };
-
-            if (gridTonKho.Columns.Contains("Số Lượng Tồn"))
-            {
-                gridTonKho.Columns["Số Lượng Tồn"].DefaultCellStyle = numberFormat;
-            }
-            if (gridTonKho.Columns.Contains("Giá Trị Tồn Kho"))
-            {
-                gridTonKho.Columns["Giá Trị Tồn Kho"].DefaultCellStyle = currencyFormat;
-            }
-
-            // Tự động điều chỉnh độ rộng cột
-            gridTonKho.Columns["Tên Hàng Hóa"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            gridTonKho.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader);
         }
     }
 }

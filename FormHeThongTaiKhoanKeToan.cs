@@ -1,16 +1,15 @@
-using DoAnLapTrinhQuanLy.Data;
 using System;
 using System.Data;
-using System.Linq;
+using System.Drawing;
 using System.Windows.Forms;
+using DoAnLapTrinhQuanLy.Data;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FormHeThongTaiKhoanKeToan : Form
     {
-        private enum FormMode { View, Edit, New }
-        private FormMode _currentMode = FormMode.View;
-        private DataTable _dt;
+        private bool isAdding = false;
+        private string selectedTK = null; // Lưu lại tài khoản đang được chọn
 
         public FormHeThongTaiKhoanKeToan()
         {
@@ -19,198 +18,228 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormHeThongTaiKhoanKeToan_Load(object sender, EventArgs e)
         {
+            LoadTreeView();
+            SetInputMode(false);
+        }
+
+        #region Xử lý dữ liệu và TreeView
+
+        private void LoadTreeView()
+        {
             try
             {
-                LoadDataAndBuildTree();
-                LoadTKMeComboBox();
-                SetFormMode(FormMode.View);
+                tvTaiKhoan.Nodes.Clear();
+                string query = "SELECT SOTK, TENTK, TK_ME FROM DM_TAIKHOANKETOAN ORDER BY SOTK";
+                DataTable dt = DbHelper.Query(query);
+
+                // Thêm các node gốc (cấp 1, không có TK_ME)
+                foreach (DataRow row in dt.Rows)
+                {
+                    if (row["TK_ME"] == DBNull.Value || string.IsNullOrEmpty(row["TK_ME"].ToString()))
+                    {
+                        TreeNode node = new TreeNode($"{row["SOTK"]} - {row["TENTK"]}");
+                        node.Name = row["SOTK"].ToString(); // Lưu SOTK vào Name để dễ tìm
+                        tvTaiKhoan.Nodes.Add(node);
+                        // Gọi đệ quy để thêm các node con
+                        AddChildNodes(node, dt);
+                    }
+                }
+                tvTaiKhoan.ExpandAll();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message);
+                MessageBox.Show("Lỗi tải cây tài khoản: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void LoadDataAndBuildTree()
+        private void AddChildNodes(TreeNode parentNode, DataTable dt)
         {
-            _dt = DbHelper.Query("SELECT SOTK, TENTK, CAP, TK_ME, GHICHU FROM dbo.DM_TAIKHOANKETOAN");
-
-            treeViewTK.Nodes.Clear();
-            var topLevelNodes = _dt.AsEnumerable().Where(row => row.IsNull("TK_ME"));
-
-            foreach (DataRow dr in topLevelNodes)
+            string parentTK = parentNode.Name;
+            foreach (DataRow row in dt.Rows)
             {
-                TreeNode node = new TreeNode($"{dr["SOTK"]} - {dr["TENTK"]}");
-                node.Tag = dr["SOTK"].ToString();
-                treeViewTK.Nodes.Add(node);
-                AddChildNodes(node, dr["SOTK"].ToString());
-            }
-            treeViewTK.ExpandAll();
-        }
-
-        private void AddChildNodes(TreeNode parentNode, string parentId)
-        {
-            var childRows = _dt.AsEnumerable().Where(row => !row.IsNull("TK_ME") && row["TK_ME"].ToString() == parentId);
-            foreach (DataRow dr in childRows)
-            {
-                TreeNode node = new TreeNode($"{dr["SOTK"]} - {dr["TENTK"]}");
-                node.Tag = dr["SOTK"].ToString();
-                parentNode.Nodes.Add(node);
-                AddChildNodes(node, dr["SOTK"].ToString());
-            }
-        }
-
-        private void LoadTKMeComboBox()
-        {
-            DataTable dtTKMe = _dt.Copy();
-            DataRow emptyRow = dtTKMe.NewRow();
-            emptyRow["SOTK"] = DBNull.Value;
-            emptyRow["TENTK"] = "-- Không có --";
-            dtTKMe.Rows.InsertAt(emptyRow, 0);
-            cboTKMe.DataSource = dtTKMe;
-            cboTKMe.ValueMember = "SOTK";
-            cboTKMe.DisplayMember = "TENTK";
-        }
-
-        // *** HÀM MỚI ĐỂ GỠ BỎ BINDING ***
-        private void ClearDataBindings()
-        {
-            foreach (Control c in grpChiTiet.Controls)
-            {
-                c.DataBindings.Clear();
-            }
-        }
-
-        // *** HÀM MỚI ĐỂ GÁN LẠI BINDING ***
-        private void DataBindingControl()
-        {
-            ClearDataBindings(); // Luôn xóa binding cũ trước khi gán mới
-            if (treeViewTK.SelectedNode?.Tag != null)
-            {
-                string soTK = treeViewTK.SelectedNode.Tag.ToString();
-                DataRow dr = _dt.AsEnumerable().FirstOrDefault(row => row["SOTK"].ToString() == soTK);
-                if (dr != null)
+                if (row["TK_ME"].ToString() == parentTK)
                 {
-                    txtSoTK.Text = dr["SOTK"].ToString();
-                    txtTenTK.Text = dr["TENTK"].ToString();
-                    numCap.Value = Convert.ToDecimal(dr["CAP"]);
-                    cboTKMe.SelectedValue = dr["TK_ME"] ?? DBNull.Value;
-                    txtGhiChu.Text = dr["GHICHU"].ToString();
+                    TreeNode childNode = new TreeNode($"{row["SOTK"]} - {row["TENTK"]}");
+                    childNode.Name = row["SOTK"].ToString();
+                    parentNode.Nodes.Add(childNode);
+                    // Tiếp tục gọi đệ quy cho node con này
+                    AddChildNodes(childNode, dt);
                 }
             }
         }
 
-
-        private void SetFormMode(FormMode mode)
-        {
-            _currentMode = mode;
-            bool isEditing = (mode != FormMode.View);
-
-            txtTenTK.ReadOnly = !isEditing;
-            numCap.Enabled = isEditing;
-            cboTKMe.Enabled = isEditing;
-            txtGhiChu.ReadOnly = !isEditing;
-            txtSoTK.ReadOnly = (mode != FormMode.New);
-
-            btnMoi.Enabled = !isEditing;
-            btnSua.Enabled = !isEditing && treeViewTK.SelectedNode != null;
-            btnLuu.Enabled = isEditing;
-            btnXoa.Enabled = !isEditing && treeViewTK.SelectedNode != null;
-            treeViewTK.Enabled = !isEditing;
-
-            if (mode == FormMode.New)
-            {
-                ClearInputControls();
-                txtSoTK.Focus();
-            }
-        }
-
-        private void ClearInputControls()
+        private void ClearInputs()
         {
             txtSoTK.Text = "";
             txtTenTK.Text = "";
+            txtTKMe.Text = "";
             numCap.Value = 1;
-            cboTKMe.SelectedValue = DBNull.Value;
             txtGhiChu.Text = "";
         }
 
-        private void treeViewTK_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            if (e.Node == null) return;
-            if (_currentMode != FormMode.View) SetFormMode(FormMode.View);
+        #endregion
 
-            // Thay vì binding, chúng ta gán dữ liệu trực tiếp để kiểm soát tốt hơn
-            DataBindingControl();
+        #region Quản lý trạng thái giao diện (UX)
+
+        private void SetInputMode(bool enable)
+        {
+            txtSoTK.ReadOnly = !isAdding;
+            txtTenTK.ReadOnly = !enable;
+            txtTKMe.ReadOnly = !enable; // TK cha thường được xác định khi thêm, không tự sửa
+            numCap.Enabled = enable;
+            txtGhiChu.ReadOnly = !enable;
+
+            btnLuu.Enabled = enable;
+            btnHuy.Enabled = enable;
+            btnThem.Enabled = !enable;
+            btnSua.Enabled = !enable;
+            btnXoa.Enabled = !enable;
         }
 
-        private void btnMoi_Click(object sender, EventArgs e) => SetFormMode(FormMode.New);
+        #endregion
+
+        #region Sự kiện
+
+        private void tvTaiKhoan_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node != null)
+            {
+                selectedTK = e.Node.Name; // Lấy SOTK từ Name của Node
+                try
+                {
+                    string query = "SELECT * FROM DM_TAIKHOANKETOAN WHERE SOTK = @SoTK";
+                    DataTable dt = DbHelper.Query(query, DbHelper.Param("@SoTK", selectedTK));
+                    if (dt.Rows.Count > 0)
+                    {
+                        DataRow row = dt.Rows[0];
+                        txtSoTK.Text = row["SOTK"].ToString();
+                        txtTenTK.Text = row["TENTK"].ToString();
+                        txtTKMe.Text = row["TK_ME"].ToString();
+                        numCap.Value = Convert.ToDecimal(row["CAP"]);
+                        txtGhiChu.Text = row["GHICHU"].ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi khi hiển thị chi tiết tài khoản: " + ex.Message);
+                }
+            }
+        }
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            isAdding = true;
+            ClearInputs();
+            // Gợi ý TK cha là TK đang chọn
+            if (selectedTK != null)
+            {
+                txtTKMe.Text = selectedTK;
+                numCap.Value = txtTKMe.Text.Length + 1; // Gợi ý cấp
+            }
+            SetInputMode(true);
+            txtSoTK.Focus();
+        }
+
         private void btnSua_Click(object sender, EventArgs e)
         {
-            if (treeViewTK.SelectedNode != null) SetFormMode(FormMode.Edit);
-        }
-        private void btnNap_Click(object sender, EventArgs e)
-        {
-            LoadDataAndBuildTree();
-            LoadTKMeComboBox();
-        }
-
-        private void btnLuu_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtSoTK.Text) || string.IsNullOrWhiteSpace(txtTenTK.Text))
+            if (string.IsNullOrEmpty(selectedTK))
             {
-                MessageBox.Show("Số và Tên tài khoản không được để trống.", "Cảnh báo");
+                MessageBox.Show("Vui lòng chọn một tài khoản để sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            try
-            {
-                var p = new[] {
-                    DbHelper.Param("@soTK", txtSoTK.Text.Trim()),
-                    DbHelper.Param("@tenTK", txtTenTK.Text.Trim()),
-                    DbHelper.Param("@cap", Convert.ToInt16(numCap.Value)),
-                    DbHelper.Param("@tkMe", cboTKMe.SelectedValue ?? (object)DBNull.Value),
-                    DbHelper.Param("@ghiChu", txtGhiChu.Text.Trim())
-                };
-
-                if (_currentMode == FormMode.New)
-                {
-                    string sql = "INSERT INTO dbo.DM_TAIKHOANKETOAN (SOTK, TENTK, CAP, TK_ME, GHICHU) VALUES (@soTK, @tenTK, @cap, @tkMe, @ghiChu)";
-                    DbHelper.Execute(sql, p);
-                }
-                else // Edit
-                {
-                    string sql = "UPDATE dbo.DM_TAIKHOANKETOAN SET TENTK=@tenTK, CAP=@cap, TK_ME=@tkMe, GHICHU=@ghiChu WHERE SOTK=@soTK";
-                    DbHelper.Execute(sql, p);
-                }
-
-                LoadDataAndBuildTree();
-                LoadTKMeComboBox();
-                SetFormMode(FormMode.View);
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("PRIMARY KEY"))
-                    MessageBox.Show("Số tài khoản này đã tồn tại.", "Lỗi");
-                else
-                    MessageBox.Show("Lỗi khi lưu: " + ex.Message, "Lỗi");
-            }
+            isAdding = false;
+            SetInputMode(true);
+            txtTenTK.Focus();
         }
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (treeViewTK.SelectedNode != null && MessageBox.Show("Bạn có chắc muốn xóa?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (string.IsNullOrEmpty(selectedTK))
+            {
+                MessageBox.Show("Vui lòng chọn một tài khoản để xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Bạn có chắc chắn muốn xóa tài khoản này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 try
                 {
-                    DbHelper.Execute("DELETE FROM dbo.DM_TAIKHOANKETOAN WHERE SOTK=@soTK", DbHelper.Param("@soTK", txtSoTK.Text));
-                    LoadDataAndBuildTree();
-                    LoadTKMeComboBox();
+                    string query = "DELETE FROM DM_TAIKHOANKETOAN WHERE SOTK = @SoTK";
+                    DbHelper.Execute(query, DbHelper.Param("@SoTK", selectedTK));
+
+                    LoadTreeView();
+                    ClearInputs();
+                    MessageBox.Show("Xóa tài khoản thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Không thể xóa tài khoản này. Có thể do đã có phát sinh giao dịch hoặc tài khoản con.\n\nChi tiết: " + ex.Message, "Lỗi ràng buộc dữ liệu");
+                    MessageBox.Show("Lỗi khi xóa: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+
+        private void btnLuu_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtSoTK.Text) || string.IsNullOrWhiteSpace(txtTenTK.Text))
+                {
+                    MessageBox.Show("Số và Tên tài khoản không được để trống.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (isAdding)
+                {
+                    string query = @"
+                        INSERT INTO DM_TAIKHOANKETOAN (SOTK, TENTK, CAP, TK_ME, GHICHU)
+                        VALUES (@SoTK, @TenTK, @Cap, @TkMe, @GhiChu)";
+                    DbHelper.Execute(query,
+                        DbHelper.Param("@SoTK", txtSoTK.Text),
+                        DbHelper.Param("@TenTK", txtTenTK.Text),
+                        DbHelper.Param("@Cap", numCap.Value),
+                        DbHelper.Param("@TkMe", string.IsNullOrEmpty(txtTKMe.Text) ? (object)DBNull.Value : txtTKMe.Text),
+                        DbHelper.Param("@GhiChu", txtGhiChu.Text)
+                    );
+                }
+                else
+                {
+                    string query = @"
+                        UPDATE DM_TAIKHOANKETOAN SET
+                            TENTK = @TenTK, CAP = @Cap, TK_ME = @TkMe, GHICHU = @GhiChu
+                        WHERE SOTK = @SoTK";
+                    DbHelper.Execute(query,
+                        DbHelper.Param("@TenTK", txtTenTK.Text),
+                        DbHelper.Param("@Cap", numCap.Value),
+                        DbHelper.Param("@TkMe", string.IsNullOrEmpty(txtTKMe.Text) ? (object)DBNull.Value : txtTKMe.Text),
+                        DbHelper.Param("@GhiChu", txtGhiChu.Text),
+                        DbHelper.Param("@SoTK", txtSoTK.Text)
+                    );
+                }
+                MessageBox.Show("Lưu dữ liệu thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadTreeView();
+                SetInputMode(false);
+                isAdding = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi lưu dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnHuy_Click(object sender, EventArgs e)
+        {
+            if (!isAdding && tvTaiKhoan.SelectedNode != null)
+            {
+                tvTaiKhoan_AfterSelect(null, new TreeViewEventArgs(tvTaiKhoan.SelectedNode));
+            }
+            else
+            {
+                ClearInputs();
+            }
+            SetInputMode(false);
+            isAdding = false;
+        }
+
+        #endregion
     }
 }

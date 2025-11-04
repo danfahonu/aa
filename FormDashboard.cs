@@ -1,9 +1,9 @@
-﻿using DoAnLapTrinhQuanLy.Data;
-using System;
+﻿using System;
 using System.Data;
-using System.Globalization;
+using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using DoAnLapTrinhQuanLy.Data;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
@@ -16,141 +16,111 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormDashboard_Load(object sender, EventArgs e)
         {
-            LoadAllData();
+            LoadKpiData();
+            LoadCategoryChart();
+            LoadTopProductsGrids();
         }
 
-        private void btnRefresh_Click(object sender, EventArgs e)
-        {
-            LoadAllData();
-        }
-
-        private void LoadAllData()
+        private void LoadKpiData()
         {
             try
             {
-                LoadSummaryCards();
-                LoadGiaTriTonKhoChart();
-                LoadTop5HangHoaTonKho();
+                // 1. Tổng giá trị tồn kho (tính chính xác từ các lô FIFO)
+                string valueQuery = "SELECT ISNULL(SUM(SO_LUONG_TON * DON_GIA_NHAP), 0) FROM KHO_CHITIET_TONKHO";
+                object totalValue = DbHelper.Scalar(valueQuery);
+                lblGiaTriTon.Text = Convert.ToDecimal(totalValue).ToString("N0");
+
+                // 2. Tổng số mặt hàng (SKU) đang quản lý
+                string skuQuery = "SELECT COUNT(MAHH) FROM DM_HANGHOA WHERE ACTIVE = 1";
+                object totalSku = DbHelper.Scalar(skuQuery);
+                lblSoMatHang.Text = Convert.ToInt32(totalSku).ToString();
+
+                // 3. Tổng số lượng đơn vị sản phẩm trong kho
+                string unitQuery = "SELECT ISNULL(SUM(TONKHO), 0) FROM DM_HANGHOA WHERE ACTIVE = 1";
+                object totalUnits = DbHelper.Scalar(unitQuery);
+                lblTongTon.Text = Convert.ToInt32(totalUnits).ToString("N0");
+
+                // 4. Số mặt hàng dưới mức tồn tối thiểu (cần có cột TONKHO_TOITHIEU trong DM_HANGHOA)
+                // Nếu chưa có, bà có thể bỏ qua phần này hoặc mặc định nó bằng 0
+                try
+                {
+                    string lowStockQuery = "SELECT COUNT(MAHH) FROM DM_HANGHOA WHERE ACTIVE = 1 AND TONKHO < TONKHO_TOITHIEU";
+                    object lowStockCount = DbHelper.Scalar(lowStockQuery);
+                    lblHangSapHet.Text = Convert.ToInt32(lowStockCount).ToString();
+                }
+                catch
+                {
+                    // Nếu bảng DM_HANGHOA chưa có cột TONKHO_TOITHIEU thì sẽ báo lỗi, ta bắt lỗi và cho nó bằng 0
+                    lblHangSapHet.Text = "N/A";
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Không thể tải dữ liệu Dashboard. Lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi tải dữ liệu KPI Kho: " + ex.Message);
             }
         }
 
-        private void LoadSummaryCards()
+        private void LoadCategoryChart()
         {
-            string sql = @"
-                -- 1. Tổng giá trị tồn kho (tính từ giá vốn nhập)
-                SELECT ISNULL(SUM(SO_LUONG_TON * DON_GIA_NHAP), 0) FROM dbo.KHO_CHITIET_TONKHO;
-
-                -- 2. Giá vốn hàng bán trong tháng
-                SELECT ISNULL(SUM(SOTIEN), 0) FROM dbo.BUTTOAN_KETOAN
-                WHERE TK_NO = '632' AND MONTH(NGAY_HT) = MONTH(GETDATE()) AND YEAR(NGAY_HT) = YEAR(GETDATE());
-
-                -- 3. Số lượng mã hàng tồn kho lâu ngày (> 30 ngày)
-                SELECT COUNT(DISTINCT MAHH) FROM dbo.KHO_CHITIET_TONKHO
-                WHERE SO_LUONG_TON > 0 AND DATEDIFF(day, NGAY_NHAP, GETDATE()) > 30;
-                
-                -- 4. Số lượng sản phẩm sắp hết hàng (tồn kho tổng < 5)
-                SELECT COUNT(MAHH) FROM dbo.DM_HANGHOA WHERE TONKHO > 0 AND TONKHO < 5;";
-
-            DataSet ds = DbHelper.QueryDs(sql);
-
-            if (ds.Tables.Count >= 4)
+            try
             {
-                CultureInfo culture = new CultureInfo("vi-VN");
+                string query = @"
+                    SELECT 
+                        nh.TENNHOM,
+                        ISNULL(SUM(t.SO_LUONG_TON * t.DON_GIA_NHAP), 0) as TongGiaTri
+                    FROM KHO_CHITIET_TONKHO t
+                    JOIN DM_HANGHOA h ON t.MAHH = h.MAHH
+                    JOIN DM_NHOMHANG nh ON h.MANHOM = nh.MANHOM
+                    WHERE t.SO_LUONG_TON > 0
+                    GROUP BY nh.TENNHOM
+                    HAVING ISNULL(SUM(t.SO_LUONG_TON * t.DON_GIA_NHAP), 0) > 0";
 
-                // 1. Tổng giá trị tồn kho
-                decimal tongGiaTriTon = Convert.ToDecimal(ds.Tables[0].Rows[0][0]);
-                lblTongGiaTriTon.Text = tongGiaTriTon.ToString("c0", culture);
+                DataTable dt = DbHelper.Query(query);
 
-                // 2. Vòng quay tồn kho
-                decimal giaVonThang = Convert.ToDecimal(ds.Tables[1].Rows[0][0]);
-                if (tongGiaTriTon > 0)
-                {
-                    // Công thức: Vòng quay = Giá vốn hàng bán kỳ / Bình quân giá trị tồn kho
-                    // (Tạm tính bình quân bằng giá trị tồn cuối kỳ)
-                    decimal vongQuay = giaVonThang / tongGiaTriTon;
-                    lblVongQuayTonKho.Text = $"{vongQuay:N2} vòng";
-                }
-                else
-                {
-                    lblVongQuayTonKho.Text = "0 vòng";
-                }
-
-                // 3. Hàng tồn kho lâu ngày
-                lblHangTonLauNgay.Text = Convert.ToInt32(ds.Tables[2].Rows[0][0]).ToString();
-
-                // 4. Cảnh báo tồn kho thấp
-                lblSapHetHang.Text = Convert.ToInt32(ds.Tables[3].Rows[0][0]).ToString();
+                chartNhomHang.DataSource = dt;
+                chartNhomHang.Series["Series1"].XValueMember = "TENNHOM";
+                chartNhomHang.Series["Series1"].YValueMembers = "TongGiaTri";
+                chartNhomHang.Series["Series1"].Label = "#PERCENT{P0}";
+                chartNhomHang.Series["Series1"].LegendText = "#VALX";
+                chartNhomHang.DataBind();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải biểu đồ Nhóm hàng: " + ex.Message);
             }
         }
 
-        private void LoadGiaTriTonKhoChart()
+        private void LoadTopProductsGrids()
         {
-            string sql = @"
-                SELECT TOP 5
-                    nh.TENNHOM,
-                    SUM(kct.SO_LUONG_TON * kct.DON_GIA_NHAP) AS GiaTriTon
-                FROM 
-                    dbo.KHO_CHITIET_TONKHO kct
-                JOIN 
-                    dbo.DM_HANGHOA hh ON kct.MAHH = hh.MAHH
-                JOIN 
-                    dbo.DM_NHOMHANG nh ON hh.MANHOM = nh.MANHOM
-                WHERE 
-                    kct.SO_LUONG_TON > 0
-                GROUP BY 
-                    nh.TENNHOM
-                ORDER BY 
-                    GiaTriTon DESC;";
-
-            DataTable dt = DbHelper.Query(sql);
-
-            chartGiaTriTonKho.Series.Clear();
-            var series = new Series("GiaTriTon")
+            try
             {
-                ChartType = SeriesChartType.Doughnut,
-                XValueMember = "TENNHOM",
-                YValueMembers = "GiaTriTon",
-                IsValueShownAsLabel = true,
-                Label = "#PERCENT{P0}",
-                LegendText = "#VALX"
-            };
-            chartGiaTriTonKho.Legends[0].Enabled = true;
-            chartGiaTriTonKho.DataSource = dt;
-            chartGiaTriTonKho.Series.Add(series);
-            chartGiaTriTonKho.DataBind();
-        }
+                // Top 5 theo số lượng
+                string topQtyQuery = @"
+                    SELECT TOP 5 
+                        h.TENHH, 
+                        SUM(t.SO_LUONG_TON) as TongTon
+                    FROM KHO_CHITIET_TONKHO t
+                    JOIN DM_HANGHOA h ON t.MAHH = h.MAHH
+                    WHERE t.SO_LUONG_TON > 0
+                    GROUP BY h.TENHH
+                    ORDER BY TongTon DESC";
+                dgvTopSoLuong.DataSource = DbHelper.Query(topQtyQuery);
 
-        private void LoadTop5HangHoaTonKho()
-        {
-            string sql = @"
-                SELECT TOP 5
-                    hh.TENHH,
-                    SUM(kct.SO_LUONG_TON * kct.DON_GIA_NHAP) AS GiaTriTon
-                FROM 
-                    dbo.KHO_CHITIET_TONKHO kct
-                JOIN 
-                    dbo.DM_HANGHOA hh ON kct.MAHH = hh.MAHH
-                WHERE 
-                    kct.SO_LUONG_TON > 0
-                GROUP BY 
-                    hh.TENHH
-                ORDER BY 
-                    GiaTriTon DESC;";
-
-            DataTable dt = DbHelper.Query(sql);
-
-            lstTopSanPham.Items.Clear();
-
-            foreach (DataRow row in dt.Rows)
+                // Top 5 theo giá trị
+                string topValueQuery = @"
+                    SELECT TOP 5 
+                        h.TENHH, 
+                        SUM(t.SO_LUONG_TON * t.DON_GIA_NHAP) as GiaTriTon
+                    FROM KHO_CHITIET_TONKHO t
+                    JOIN DM_HANGHOA h ON t.MAHH = h.MAHH
+                    WHERE t.SO_LUONG_TON > 0
+                    GROUP BY h.TENHH
+                    ORDER BY GiaTriTon DESC";
+                dgvTopGiaTri.DataSource = DbHelper.Query(topValueQuery);
+            }
+            catch (Exception ex)
             {
-                ListViewItem item = new ListViewItem(row["TENHH"].ToString());
-                decimal giaTri = Convert.ToDecimal(row["GiaTriTon"]);
-                item.SubItems.Add(giaTri.ToString("N0"));
-                lstTopSanPham.Items.Add(item);
+                MessageBox.Show("Lỗi tải top sản phẩm tồn kho: " + ex.Message);
             }
         }
     }

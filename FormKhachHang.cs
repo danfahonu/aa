@@ -1,16 +1,14 @@
-using DoAnLapTrinhQuanLy.Data;
 using System;
 using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
+using DoAnLapTrinhQuanLy.Data; // Đảm bảo using này đúng
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FormKhachHang : Form
     {
-        private enum FormMode { View, Edit, New }
-        private FormMode _currentMode = FormMode.View;
-        private DataTable _dt;
-        private BindingSource _bs = new BindingSource();
+        private bool isAdding = false;
 
         public FormKhachHang()
         {
@@ -19,93 +17,27 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormKhachHang_Load(object sender, EventArgs e)
         {
-            try
-            {
-                LoadData();
-                DataBindingControl();
-                SetFormMode(FormMode.View);
-                gridMain.SelectionChanged += gridMain_SelectionChanged;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message);
-            }
+            LoadData();
+            SetInputMode(false); // Khóa giao diện khi mới mở
         }
+
+        #region Xử lý dữ liệu
 
         private void LoadData()
         {
-            _dt = DbHelper.Query("SELECT MAKH, TENKH, DIACHI, SDT, EMAIL, GHICHU FROM dbo.DANHMUCKHACHHANG ORDER BY TENKH");
-            _bs.DataSource = _dt;
-            gridMain.DataSource = _bs;
-            ConfigureGrid();
-        }
-
-        private void ConfigureGrid()
-        {
-            gridMain.Columns["MAKH"].HeaderText = "Mã KH";
-            gridMain.Columns["TENKH"].HeaderText = "Tên Khách Hàng";
-            gridMain.Columns["DIACHI"].HeaderText = "Địa Chỉ";
-            gridMain.Columns["SDT"].HeaderText = "Số Điện Thoại";
-            gridMain.Columns["EMAIL"].HeaderText = "Email";
-            gridMain.Columns["GHICHU"].Visible = false; // Ẩn cột ghi chú cho gọn
-            gridMain.AutoResizeColumns();
-        }
-
-        private void DataBindingControl()
-        {
-            ClearDataBindings();
-            txtMaKH.DataBindings.Add("Text", _bs, "MAKH", true, DataSourceUpdateMode.Never);
-            txtTenKH.DataBindings.Add("Text", _bs, "TENKH", true, DataSourceUpdateMode.Never);
-            txtDiaChi.DataBindings.Add("Text", _bs, "DIACHI", true, DataSourceUpdateMode.Never);
-            txtSDT.DataBindings.Add("Text", _bs, "SDT", true, DataSourceUpdateMode.Never);
-            txtEmail.DataBindings.Add("Text", _bs, "EMAIL", true, DataSourceUpdateMode.Never);
-            txtGhiChu.DataBindings.Add("Text", _bs, "GHICHU", true, DataSourceUpdateMode.Never);
-        }
-
-        private void SetFormMode(FormMode mode)
-        {
-            _currentMode = mode;
-            bool isEditing = (mode != FormMode.View);
-
-            txtTenKH.ReadOnly = !isEditing;
-            txtDiaChi.ReadOnly = !isEditing;
-            txtSDT.ReadOnly = !isEditing;
-            txtEmail.ReadOnly = !isEditing;
-            txtGhiChu.ReadOnly = !isEditing;
-            txtMaKH.ReadOnly = (mode != FormMode.New);
-
-            btnMoi.Enabled = !isEditing;
-            btnSua.Enabled = !isEditing && _bs.Current != null;
-            btnLuu.Enabled = isEditing;
-            btnXoa.Enabled = !isEditing && _bs.Current != null;
-            gridMain.Enabled = !isEditing;
-
-            if (mode == FormMode.New)
+            try
             {
-                ClearDataBindings();
-                ClearInputControls();
-                txtMaKH.Focus();
+                string query = "SELECT MAKH, TENKH, DIACHI, SDT, EMAIL, GHICHU FROM DANHMUCKHACHHANG";
+                DataTable dt = DbHelper.Query(query);
+                dgvKhachHang.DataSource = dt;
             }
-            else
+            catch (Exception ex)
             {
-                if (txtMaKH.DataBindings.Count == 0)
-                {
-                    DataBindingControl();
-                }
+                MessageBox.Show("Lỗi tải dữ liệu khách hàng: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void ClearDataBindings()
-        {
-            txtMaKH.DataBindings.Clear();
-            txtTenKH.DataBindings.Clear();
-            txtDiaChi.DataBindings.Clear();
-            txtSDT.DataBindings.Clear();
-            txtEmail.DataBindings.Clear();
-            txtGhiChu.DataBindings.Clear();
-        }
-
-        private void ClearInputControls()
+        private void ClearInputs()
         {
             txtMaKH.Text = "";
             txtTenKH.Text = "";
@@ -115,75 +47,156 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtGhiChu.Text = "";
         }
 
-        private void gridMain_SelectionChanged(object sender, EventArgs e)
+        #endregion
+
+        #region Quản lý trạng thái giao diện (UX)
+
+        private void SetInputMode(bool enable)
         {
-            if (_currentMode != FormMode.View) SetFormMode(FormMode.View);
+            txtMaKH.ReadOnly = !isAdding;
+            txtTenKH.ReadOnly = !enable;
+            txtDiaChi.ReadOnly = !enable;
+            txtSDT.ReadOnly = !enable;
+            txtEmail.ReadOnly = !enable;
+            txtGhiChu.ReadOnly = !enable;
+
+            btnLuu.Enabled = enable;
+            btnHuy.Enabled = enable;
+            btnThem.Enabled = !enable;
+            btnSua.Enabled = !enable;
+            btnXoa.Enabled = !enable;
         }
 
-        private void btnMoi_Click(object sender, EventArgs e) => SetFormMode(FormMode.New);
+        #endregion
+
+        #region Sự kiện
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            isAdding = true;
+            ClearInputs();
+            SetInputMode(true);
+            txtMaKH.Focus();
+        }
+
         private void btnSua_Click(object sender, EventArgs e)
         {
-            if (_bs.Current != null) SetFormMode(FormMode.Edit);
-        }
-        private void btnNap_Click(object sender, EventArgs e) => LoadData();
-
-        private void btnLuu_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtMaKH.Text) || string.IsNullOrWhiteSpace(txtTenKH.Text))
+            if (dgvKhachHang.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Mã và Tên khách hàng không được để trống.", "Cảnh báo");
+                MessageBox.Show("Vui lòng chọn một khách hàng để sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            try
-            {
-                var p = new[] {
-                    DbHelper.Param("@ma", txtMaKH.Text.Trim()),
-                    DbHelper.Param("@ten", txtTenKH.Text.Trim()),
-                    DbHelper.Param("@diaChi", txtDiaChi.Text.Trim()),
-                    DbHelper.Param("@sdt", txtSDT.Text.Trim()),
-                    DbHelper.Param("@email", txtEmail.Text.Trim()),
-                    DbHelper.Param("@ghiChu", txtGhiChu.Text.Trim())
-                };
-
-                if (_currentMode == FormMode.New)
-                {
-                    string sql = "INSERT INTO dbo.DANHMUCKHACHHANG (MAKH, TENKH, DIACHI, SDT, EMAIL, GHICHU) VALUES (@ma, @ten, @diaChi, @sdt, @email, @ghiChu)";
-                    DbHelper.Execute(sql, p);
-                }
-                else // Edit
-                {
-                    string sql = "UPDATE dbo.DANHMUCKHACHHANG SET TENKH=@ten, DIACHI=@diaChi, SDT=@sdt, EMAIL=@email, GHICHU=@ghiChu WHERE MAKH=@ma";
-                    DbHelper.Execute(sql, p);
-                }
-
-                LoadData();
-                _bs.Position = _bs.Find("MAKH", txtMaKH.Text.Trim());
-                SetFormMode(FormMode.View);
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("PRIMARY KEY"))
-                    MessageBox.Show("Mã khách hàng này đã tồn tại. Vui lòng chọn mã khác.", "Lỗi");
-                else
-                    MessageBox.Show("Lỗi khi lưu: " + ex.Message, "Lỗi");
-            }
+            isAdding = false;
+            SetInputMode(true);
+            txtTenKH.Focus();
         }
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (_bs.Current != null && MessageBox.Show("Bạn có chắc muốn xóa?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (dgvKhachHang.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn một khách hàng để xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Bạn có chắc chắn muốn xóa khách hàng này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 try
                 {
-                    DbHelper.Execute("DELETE FROM dbo.DANHMUCKHACHHANG WHERE MAKH=@ma", DbHelper.Param("@ma", txtMaKH.Text));
+                    string maKH = dgvKhachHang.SelectedRows[0].Cells["MAKH"].Value.ToString();
+                    string query = "DELETE FROM DANHMUCKHACHHANG WHERE MAKH = @MaKH";
+                    DbHelper.Execute(query, DbHelper.Param("@MaKH", maKH));
+
                     LoadData();
+                    MessageBox.Show("Xóa khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Không thể xóa khách hàng này. Có thể do đã có phát sinh giao dịch liên quan.\n\nChi tiết: " + ex.Message, "Lỗi ràng buộc dữ liệu");
+                    MessageBox.Show("Lỗi khi xóa: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+
+        private void btnLuu_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtMaKH.Text) || string.IsNullOrWhiteSpace(txtTenKH.Text))
+                {
+                    MessageBox.Show("Mã và Tên khách hàng không được để trống.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (isAdding)
+                {
+                    string query = @"
+                        INSERT INTO DANHMUCKHACHHANG (MAKH, TENKH, DIACHI, SDT, EMAIL, GHICHU, NGAYTAO)
+                        VALUES (@MaKH, @TenKH, @DiaChi, @SDT, @Email, @GhiChu, @NgayTao)";
+                    DbHelper.Execute(query,
+                        DbHelper.Param("@MaKH", txtMaKH.Text),
+                        DbHelper.Param("@TenKH", txtTenKH.Text),
+                        DbHelper.Param("@DiaChi", txtDiaChi.Text),
+                        DbHelper.Param("@SDT", txtSDT.Text),
+                        DbHelper.Param("@Email", txtEmail.Text),
+                        DbHelper.Param("@GhiChu", txtGhiChu.Text),
+                        DbHelper.Param("@NgayTao", DateTime.Now)
+                    );
+                }
+                else
+                {
+                    string query = @"
+                        UPDATE DANHMUCKHACHHANG SET
+                            TENKH = @TenKH, DIACHI = @DiaChi, SDT = @SDT, 
+                            EMAIL = @Email, GHICHU = @GhiChu
+                        WHERE MAKH = @MaKH";
+                    DbHelper.Execute(query,
+                        DbHelper.Param("@TenKH", txtTenKH.Text),
+                        DbHelper.Param("@DiaChi", txtDiaChi.Text),
+                        DbHelper.Param("@SDT", txtSDT.Text),
+                        DbHelper.Param("@Email", txtEmail.Text),
+                        DbHelper.Param("@GhiChu", txtGhiChu.Text),
+                        DbHelper.Param("@MaKH", txtMaKH.Text)
+                    );
+                }
+                MessageBox.Show("Lưu dữ liệu thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                SetInputMode(false);
+                isAdding = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi lưu dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnHuy_Click(object sender, EventArgs e)
+        {
+            if (!isAdding)
+            {
+                dgvKhachHang_SelectionChanged(null, null);
+            }
+            else
+            {
+                ClearInputs();
+            }
+            SetInputMode(false);
+            isAdding = false;
+        }
+
+        private void dgvKhachHang_SelectionChanged(object sender, EventArgs e)
+        {
+            if (!isAdding && dgvKhachHang.SelectedRows.Count > 0)
+            {
+                var row = dgvKhachHang.SelectedRows[0];
+                txtMaKH.Text = row.Cells["MAKH"].Value?.ToString();
+                txtTenKH.Text = row.Cells["TENKH"].Value?.ToString();
+                txtDiaChi.Text = row.Cells["DIACHI"].Value?.ToString();
+                txtSDT.Text = row.Cells["SDT"].Value?.ToString();
+                txtEmail.Text = row.Cells["EMAIL"].Value?.ToString();
+                txtGhiChu.Text = row.Cells["GHICHU"].Value?.ToString();
+            }
+        }
+
+        #endregion
     }
 }

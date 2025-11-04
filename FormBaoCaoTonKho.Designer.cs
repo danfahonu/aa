@@ -17,107 +17,148 @@
 
         private void InitializeComponent()
         {
-            this.panelTop = new System.Windows.Forms.Panel();
-            this.btnRefresh = new System.Windows.Forms.Button();
+            this.pnlHeader = new System.Windows.Forms.Panel();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.gridTonKho = new System.Windows.Forms.DataGridView();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.staTongGiaTri = new System.Windows.Forms.ToolStripStatusLabel();
-            this.panelTop.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridTonKho)).BeginInit();
-            this.statusStrip1.SuspendLayout();
+            this.pnlFilters = new System.Windows.Forms.Panel();
+            this.btnXemBaoCao = new System.Windows.Forms.Button();
+            this.dgvBaoCao = new System.Windows.Forms.DataGridView();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.lblTongGiaTri = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.pnlHeader.SuspendLayout();
+            this.pnlFilters.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBaoCao)).BeginInit();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // panelTop
+            // pnlHeader
             // 
-            this.panelTop.Controls.Add(this.btnRefresh);
-            this.panelTop.Controls.Add(this.lblTitle);
-            this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelTop.Location = new System.Drawing.Point(0, 0);
-            this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(984, 60);
-            this.panelTop.TabIndex = 0;
-            // 
-            // btnRefresh
-            // 
-            this.btnRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRefresh.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRefresh.Location = new System.Drawing.Point(851, 12);
-            this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(121, 36);
-            this.btnRefresh.TabIndex = 1;
-            this.btnRefresh.Text = "Làm Mới";
-            this.btnRefresh.UseVisualStyleBackColor = true;
-            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
+            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(34)))), ((int)(((byte)(56)))));
+            this.pnlHeader.Controls.Add(this.lblTitle);
+            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlHeader.Location = new System.Drawing.Point(0, 0);
+            this.pnlHeader.Name = "pnlHeader";
+            this.pnlHeader.Size = new System.Drawing.Size(884, 50);
+            this.pnlHeader.TabIndex = 1;
             // 
             // lblTitle
             // 
             this.lblTitle.AutoSize = true;
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTitle.Location = new System.Drawing.Point(12, 15);
+            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold);
+            this.lblTitle.ForeColor = System.Drawing.Color.Gainsboro;
+            this.lblTitle.Location = new System.Drawing.Point(12, 13);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(277, 30);
+            this.lblTitle.Size = new System.Drawing.Size(259, 25);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "BÁO CÁO TỒN KHO TỔNG HỢP";
+            this.lblTitle.Text = "BÁO CÁO TỔNG HỢP TỒN KHO";
             // 
-            // gridTonKho
+            // pnlFilters
             // 
-            this.gridTonKho.AllowUserToAddRows = false;
-            this.gridTonKho.AllowUserToDeleteRows = false;
-            this.gridTonKho.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gridTonKho.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridTonKho.Location = new System.Drawing.Point(0, 60);
-            this.gridTonKho.Name = "gridTonKho";
-            this.gridTonKho.ReadOnly = true;
-            this.gridTonKho.RowTemplate.Height = 25;
-            this.gridTonKho.Size = new System.Drawing.Size(984, 479);
-            this.gridTonKho.TabIndex = 1;
+            this.pnlFilters.Controls.Add(this.btnXemBaoCao);
+            this.pnlFilters.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlFilters.Location = new System.Drawing.Point(0, 50);
+            this.pnlFilters.Name = "pnlFilters";
+            this.pnlFilters.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.pnlFilters.Size = new System.Drawing.Size(884, 60);
+            this.pnlFilters.TabIndex = 2;
             // 
-            // statusStrip1
+            // btnXemBaoCao
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.staTongGiaTri});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 539);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(984, 22);
-            this.statusStrip1.TabIndex = 2;
-            this.statusStrip1.Text = "statusStrip1";
+            this.btnXemBaoCao.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(157)))), ((int)(((byte)(170)))), ((int)(((byte)(242)))));
+            this.btnXemBaoCao.FlatAppearance.BorderSize = 0;
+            this.btnXemBaoCao.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnXemBaoCao.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btnXemBaoCao.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(34)))), ((int)(((byte)(56)))));
+            this.btnXemBaoCao.Location = new System.Drawing.Point(18, 15);
+            this.btnXemBaoCao.Name = "btnXemBaoCao";
+            this.btnXemBaoCao.Size = new System.Drawing.Size(120, 30);
+            this.btnXemBaoCao.TabIndex = 0;
+            this.btnXemBaoCao.Text = "Xem Báo Cáo";
+            this.btnXemBaoCao.UseVisualStyleBackColor = false;
+            this.btnXemBaoCao.Click += new System.EventHandler(this.btnXemBaoCao_Click);
             // 
-            // staTongGiaTri
+            // dgvBaoCao
             // 
-            this.staTongGiaTri.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.staTongGiaTri.Name = "staTongGiaTri";
-            this.staTongGiaTri.Size = new System.Drawing.Size(133, 17);
-            this.staTongGiaTri.Text = "Tổng giá trị tồn kho: 0";
+            this.dgvBaoCao.AllowUserToAddRows = false;
+            this.dgvBaoCao.AllowUserToDeleteRows = false;
+            this.dgvBaoCao.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvBaoCao.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvBaoCao.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvBaoCao.Location = new System.Drawing.Point(0, 110);
+            this.dgvBaoCao.Name = "dgvBaoCao";
+            this.dgvBaoCao.ReadOnly = true;
+            this.dgvBaoCao.RowHeadersVisible = false;
+            this.dgvBaoCao.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvBaoCao.Size = new System.Drawing.Size(884, 301);
+            this.dgvBaoCao.TabIndex = 3;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.lblTongGiaTri);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 411);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(884, 50);
+            this.panel1.TabIndex = 4;
+            // 
+            // lblTongGiaTri
+            // 
+            this.lblTongGiaTri.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblTongGiaTri.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold);
+            this.lblTongGiaTri.ForeColor = System.Drawing.Color.Gainsboro;
+            this.lblTongGiaTri.Location = new System.Drawing.Point(623, 13);
+            this.lblTongGiaTri.Name = "lblTongGiaTri";
+            this.lblTongGiaTri.Size = new System.Drawing.Size(249, 25);
+            this.lblTongGiaTri.TabIndex = 1;
+            this.lblTongGiaTri.Text = "0 VNĐ";
+            this.lblTongGiaTri.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold);
+            this.label1.ForeColor = System.Drawing.Color.Gainsboro;
+            this.label1.Location = new System.Drawing.Point(407, 13);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(210, 25);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Tổng Giá Trị Tồn Kho:";
             // 
             // FormBaoCaoTonKho
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(984, 561);
-            this.Controls.Add(this.gridTonKho);
-            this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.panelTop);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(22)))), ((int)(((byte)(38)))));
+            this.ClientSize = new System.Drawing.Size(884, 461);
+            this.Controls.Add(this.dgvBaoCao);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.pnlFilters);
+            this.Controls.Add(this.pnlHeader);
+            this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "FormBaoCaoTonKho";
-            this.Text = "Báo Cáo Tồn Kho Tổng Hợp";
+            this.Text = "Báo Cáo Tồn Kho";
             this.Load += new System.EventHandler(this.FormBaoCaoTonKho_Load);
-            this.panelTop.ResumeLayout(false);
-            this.panelTop.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridTonKho)).EndInit();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
+            this.pnlHeader.ResumeLayout(false);
+            this.pnlHeader.PerformLayout();
+            this.pnlFilters.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBaoCao)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
+
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel panelTop;
+        private System.Windows.Forms.Panel pnlHeader;
         private System.Windows.Forms.Label lblTitle;
-        private System.Windows.Forms.DataGridView gridTonKho;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel staTongGiaTri;
-        private System.Windows.Forms.Button btnRefresh;
+        private System.Windows.Forms.Panel pnlFilters;
+        private System.Windows.Forms.Button btnXemBaoCao;
+        private System.Windows.Forms.DataGridView dgvBaoCao;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblTongGiaTri;
     }
 }

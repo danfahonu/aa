@@ -1,142 +1,92 @@
-using DoAnLapTrinhQuanLy.Data; // Sử dụng DbHelper
+using DoAnLapTrinhQuanLy.Data; // Đảm bảo using này đúng
 using System;
-using System.Data;
-using System.Data.SqlClient;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FormDoiMatKhau : Form
     {
-        // ===================================================================================
-        // KHAI BÁO BIẾN & CONSTRUCTOR
-        // ===================================================================================
-
-        private int _currentUserId;
-        private string _currentUserName;
-
-        /// <summary>
-        /// Constructor yêu cầu ID người dùng đang đăng nhập để biết tài khoản nào cần đổi mật khẩu.
-        /// </summary>
-        /// <param name="userId">ID (khóa chính) của người dùng trong bảng NGUOIDUNG.</param>
-        /// <param name="userName">Tên hiển thị của người dùng (tùy chọn).</param>
-        public FormDoiMatKhau(int userId, string userName = "Người dùng")
+        public FormDoiMatKhau()
         {
             InitializeComponent();
-            _currentUserId = userId;
-            _currentUserName = userName;
-            this.Text = $"Đổi mật khẩu - {_currentUserName}";
         }
 
         private void FormDoiMatKhau_Load(object sender, EventArgs e)
         {
-            txtMatKhauCu.Focus();
+            // Tự động điền tên đăng nhập của người dùng hiện tại
+            if (Session.LoggedInUser != null)
+            {
+                txtTenDangNhap.Text = Session.LoggedInUser.TaiKhoan;
+            }
+            else
+            {
+                // Nếu chưa có ai đăng nhập, không cho phép đổi mật khẩu
+                MessageBox.Show("Vui lòng đăng nhập để sử dụng chức năng này.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
+            }
         }
 
-        // ===================================================================================
-        // LOGIC ĐỔI MẬT KHẨU
-        // ===================================================================================
+        private void ClearInputs()
+        {
+            txtMatKhauCu.Text = "";
+            txtMatKhauMoi.Text = "";
+            txtXacNhanMK.Text = "";
+        }
 
-        private void btnDoiMatKhau_Click(object sender, EventArgs e)
+        private void btnHuy_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void btnXacNhan_Click(object sender, EventArgs e)
         {
             string matKhauCu = txtMatKhauCu.Text;
             string matKhauMoi = txtMatKhauMoi.Text;
-            string xacNhan = txtXacNhan.Text;
+            string xacNhanMK = txtXacNhanMK.Text;
 
-            // 1. Kiểm tra ràng buộc đầu vào
-            if (string.IsNullOrEmpty(matKhauCu) || string.IsNullOrEmpty(matKhauMoi) || string.IsNullOrEmpty(xacNhan))
+            // 1. Kiểm tra các ô nhập liệu có trống không
+            if (string.IsNullOrWhiteSpace(matKhauCu) || string.IsNullOrWhiteSpace(matKhauMoi) || string.IsNullOrWhiteSpace(xacNhanMK))
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ các trường.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (matKhauMoi != xacNhan)
+
+            // 2. Kiểm tra mật khẩu cũ có đúng không
+            if (matKhauCu != Session.LoggedInUser.MatKhau)
             {
-                MessageBox.Show("Mật khẩu mới và Xác nhận mật khẩu không khớp.", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Mật khẩu cũ không chính xác.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtMatKhauCu.Focus();
                 return;
             }
-            if (matKhauMoi.Length < 3) // Ví dụ: yêu cầu độ dài tối thiểu
+
+            // 3. Kiểm tra mật khẩu mới và xác nhận có khớp không
+            if (matKhauMoi != xacNhanMK)
             {
-                MessageBox.Show("Mật khẩu mới phải có ít nhất 3 ký tự.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Mật khẩu mới và mật khẩu xác nhận không khớp.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtMatKhauMoi.Focus();
                 return;
             }
 
             try
             {
-                // 2. Xác thực mật khẩu cũ
-                // Lấy mật khẩu (đã băm hoặc trần) hiện tại từ CSDL
-                string sqlCheck = "SELECT MATKHAU FROM dbo.NGUOIDUNG WHERE ID = @ID";
-                object storedPasswordObj = DbHelper.Scalar(sqlCheck, DbHelper.Param("@ID", _currentUserId));
-
-                if (storedPasswordObj == null)
-                {
-                    MessageBox.Show("Tài khoản người dùng không hợp lệ.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                string storedPassword = Convert.ToString(storedPasswordObj);
-                bool isPasswordValid = false;
-
-                // *******************************************************************
-                // ** LOGIC QUAN TRỌNG: XÁC THỰC MẬT KHẨU **
-                // *******************************************************************
-
-                // Nếu đang dùng HASH (nên là vậy):
-                // if (VerifyHash(matKhauCu, storedPassword)) isPasswordValid = true; 
-
-                // Tạm thời, dùng mật khẩu trần để khớp với dữ liệu mẫu:
-                if (matKhauCu == storedPassword)
-                {
-                    isPasswordValid = true;
-                }
-                // *******************************************************************
-
-                if (!isPasswordValid)
-                {
-                    MessageBox.Show("Mật khẩu cũ không chính xác.", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    txtMatKhauCu.Focus();
-                    return;
-                }
-
-                // 3. Chuẩn bị cập nhật mật khẩu mới
-                // *******************************************************************
-                // ** LOGIC QUAN TRỌNG: BĂM MẬT KHẨU MỚI **
-                // *******************************************************************
-                // Nếu đang dùng HASH:
-                // string hashedPassword = HashPassword(matKhauMoi);
-
-                // Tạm thời, dùng mật khẩu trần để khớp với dữ liệu mẫu:
-                string hashedPassword = matKhauMoi;
-                // *******************************************************************
-
-
-                // 4. Thực hiện cập nhật vào CSDL
-                string sqlUpdate = "UPDATE dbo.NGUOIDUNG SET MATKHAU = @MATKHAUMOI WHERE ID = @ID";
-
-                int rowsAffected = DbHelper.Execute(sqlUpdate,
-                    DbHelper.Param("@MATKHAUMOI", hashedPassword),
-                    DbHelper.Param("@ID", _currentUserId)
+                // 4. Cập nhật mật khẩu mới vào CSDL
+                string query = "UPDATE NGUOIDUNG SET MATKHAU = @MatKhauMoi WHERE TAIKHOAN = @TaiKhoan";
+                DbHelper.Execute(query,
+                    DbHelper.Param("@MatKhauMoi", matKhauMoi),
+                    DbHelper.Param("@TaiKhoan", Session.LoggedInUser.TaiKhoan)
                 );
 
-                if (rowsAffected > 0)
-                {
-                    MessageBox.Show("Đổi mật khẩu thành công! Vui lòng đăng nhập lại vào lần sau.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
-                }
-                else
-                {
-                    MessageBox.Show("Không thể cập nhật mật khẩu. Vui lòng thử lại.", "Lỗi cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                // Cập nhật lại mật khẩu trong Session để các lần kiểm tra sau được đúng
+                Session.LoggedInUser.MatKhau = matKhauMoi;
+
+                MessageBox.Show("Đổi mật khẩu thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi hệ thống khi đổi mật khẩu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi cập nhật mật khẩu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void btnThoat_Click(object sender, EventArgs e)
-        {
-            this.Close();
         }
     }
 }

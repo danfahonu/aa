@@ -1,20 +1,16 @@
-using DoAnLapTrinhQuanLy.Data;
 using System;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using DoAnLapTrinhQuanLy.Data; // Đảm bảo using này đúng
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FormNhanVien : Form
     {
-        private enum FormMode { View, Edit, New }
-        private FormMode _currentMode = FormMode.View;
-        private DataTable _dt;
-        private BindingSource _bs = new BindingSource();
-        private DataTable _dtChucVu;
-        private string _currentImagePath = null;
+        private bool isAdding = false;
+        private string currentImagePath = null;
 
         public FormNhanVien()
         {
@@ -23,100 +19,44 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormNhanVien_Load(object sender, EventArgs e)
         {
-            try
-            {
-                LoadLookups();
-                LoadData();
-                DataBindingControl();
-                SetFormMode(FormMode.View);
-                gridMain.SelectionChanged += gridMain_SelectionChanged;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message);
-            }
+            LoadData();
+            LoadComboBoxChucVu();
+            SetInputMode(false); // Khóa giao diện khi mới mở
         }
 
-        private void LoadLookups()
-        {
-            _dtChucVu = DbHelper.Query("SELECT CHUCVU FROM dbo.HESOLUONG ORDER BY CHUCVU");
-            cboChucVu.DataSource = _dtChucVu;
-            cboChucVu.DisplayMember = "CHUCVU";
-            cboChucVu.ValueMember = "CHUCVU";
-        }
+        #region Xử lý dữ liệu
 
         private void LoadData()
         {
-            _dt = DbHelper.Query("SELECT MANV, HOTEN, DIACHI, SDT, EMAIL, CHUCVU, ANH FROM dbo.NHANVIEN ORDER BY HOTEN");
-            _bs.DataSource = _dt;
-            gridMain.DataSource = _bs;
-            ConfigureGrid();
-        }
-
-        private void ConfigureGrid()
-        {
-            gridMain.Columns["MANV"].HeaderText = "Mã NV";
-            gridMain.Columns["HOTEN"].HeaderText = "Họ Tên";
-            gridMain.Columns["CHUCVU"].HeaderText = "Chức Vụ";
-            gridMain.Columns["SDT"].HeaderText = "Số Điện Thoại";
-            gridMain.Columns["DIACHI"].HeaderText = "Địa Chỉ";
-            gridMain.Columns["EMAIL"].HeaderText = "Email";
-            gridMain.Columns["ANH"].Visible = false;
-            gridMain.AutoResizeColumns();
-        }
-
-        private void DataBindingControl()
-        {
-            ClearDataBindings();
-            txtMaNV.DataBindings.Add("Text", _bs, "MANV", true, DataSourceUpdateMode.Never);
-            txtHoTen.DataBindings.Add("Text", _bs, "HOTEN", true, DataSourceUpdateMode.Never);
-            txtDiaChi.DataBindings.Add("Text", _bs, "DIACHI", true, DataSourceUpdateMode.Never);
-            txtSDT.DataBindings.Add("Text", _bs, "SDT", true, DataSourceUpdateMode.Never);
-            txtEmail.DataBindings.Add("Text", _bs, "EMAIL", true, DataSourceUpdateMode.Never);
-            cboChucVu.DataBindings.Add("SelectedValue", _bs, "CHUCVU", true, DataSourceUpdateMode.Never);
-        }
-
-        private void SetFormMode(FormMode mode)
-        {
-            _currentMode = mode;
-            bool isEditing = (mode != FormMode.View);
-
-            txtHoTen.ReadOnly = !isEditing;
-            txtDiaChi.ReadOnly = !isEditing;
-            txtSDT.ReadOnly = !isEditing;
-            txtEmail.ReadOnly = !isEditing;
-            cboChucVu.Enabled = isEditing;
-            btnChonAnh.Enabled = isEditing;
-            txtMaNV.ReadOnly = (mode != FormMode.New);
-
-            btnMoi.Enabled = !isEditing;
-            btnSua.Enabled = !isEditing && _bs.Current != null;
-            btnLuu.Enabled = isEditing;
-            btnXoa.Enabled = !isEditing && _bs.Current != null;
-            gridMain.Enabled = !isEditing;
-
-            if (mode == FormMode.New)
+            try
             {
-                ClearDataBindings();
-                ClearInputControls();
-                txtMaNV.Focus();
+                string query = "SELECT MANV, HOTEN, CHUCVU, DIACHI, SDT, EMAIL, ANH, HOATDONG FROM NHANVIEN";
+                DataTable dt = DbHelper.Query(query);
+                dgvNhanVien.DataSource = dt;
             }
-            else
+            catch (Exception ex)
             {
-                if (txtMaNV.DataBindings.Count == 0)
-                {
-                    DataBindingControl();
-                }
+                MessageBox.Show("Lỗi tải dữ liệu nhân viên: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void ClearDataBindings()
+        private void LoadComboBoxChucVu()
         {
-            foreach (Control c in grpChiTiet.Controls) c.DataBindings.Clear();
-            picAnh.DataBindings.Clear();
+            try
+            {
+                string query = "SELECT CHUCVU FROM HESOLUONG";
+                DataTable dt = DbHelper.Query(query);
+                cboChucVu.DataSource = dt;
+                cboChucVu.DisplayMember = "CHUCVU";
+                cboChucVu.ValueMember = "CHUCVU";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải danh sách chức vụ: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        private void ClearInputControls()
+        private void ClearInputs()
         {
             txtMaNV.Text = "";
             txtHoTen.Text = "";
@@ -124,131 +64,188 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtSDT.Text = "";
             txtEmail.Text = "";
             cboChucVu.SelectedIndex = -1;
-            picAnh.Image = null;
-            _currentImagePath = null;
+            chkHoatDong.Checked = true;
+            picHinhAnh.Image = null;
+            currentImagePath = null;
         }
 
-        private void gridMain_SelectionChanged(object sender, EventArgs e)
+        #endregion
+
+        #region Quản lý trạng thái giao diện (UX)
+
+        private void SetInputMode(bool enable)
         {
-            if (_bs.Current == null) return;
-            if (_currentMode != FormMode.View) SetFormMode(FormMode.View);
+            txtMaNV.ReadOnly = !isAdding;
+            txtHoTen.ReadOnly = !enable;
+            txtDiaChi.ReadOnly = !enable;
+            txtSDT.ReadOnly = !enable;
+            txtEmail.ReadOnly = !enable;
+            cboChucVu.Enabled = enable;
+            chkHoatDong.Enabled = enable;
+            btnBrowse.Enabled = enable;
 
-            DataRowView drv = (DataRowView)_bs.Current;
-            string relativePath = drv["ANH"]?.ToString();
-
-            if (!string.IsNullOrEmpty(relativePath))
-            {
-                string fullPath = Path.Combine(Application.StartupPath, relativePath);
-                try
-                {
-                    using (var bmpTemp = new Bitmap(fullPath))
-                    {
-                        picAnh.Image = new Bitmap(bmpTemp);
-                    }
-                }
-                catch { picAnh.Image = null; }
-            }
-            else
-            {
-                picAnh.Image = null;
-            }
+            btnLuu.Enabled = enable;
+            btnHuy.Enabled = enable;
+            btnThem.Enabled = !enable;
+            btnSua.Enabled = !enable;
+            btnXoa.Enabled = !enable;
         }
 
-        private void btnChonAnh_Click(object sender, EventArgs e)
+        #endregion
+
+        #region Sự kiện
+
+        private void btnThem_Click(object sender, EventArgs e)
         {
-            openFileDialog1.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.bmp";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                _currentImagePath = openFileDialog1.FileName;
-                picAnh.Image = Image.FromFile(_currentImagePath);
-            }
+            isAdding = true;
+            ClearInputs();
+            SetInputMode(true);
+            txtMaNV.Focus();
         }
 
-        private void btnMoi_Click(object sender, EventArgs e) => SetFormMode(FormMode.New);
         private void btnSua_Click(object sender, EventArgs e)
         {
-            if (_bs.Current != null)
+            if (dgvNhanVien.SelectedRows.Count == 0)
             {
-                _currentImagePath = null;
-                SetFormMode(FormMode.Edit);
-            }
-        }
-        private void btnNap_Click(object sender, EventArgs e) => LoadData();
-
-        private void btnLuu_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtMaNV.Text) || string.IsNullOrWhiteSpace(txtHoTen.Text))
-            {
-                MessageBox.Show("Mã và Tên nhân viên không được để trống.", "Cảnh báo");
+                MessageBox.Show("Vui lòng chọn một nhân viên để sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            try
-            {
-                string finalImagePath = null;
-                if (!string.IsNullOrEmpty(_currentImagePath))
-                {
-                    string imageDir = Path.Combine(Application.StartupPath, "Images");
-                    if (!Directory.Exists(imageDir)) Directory.CreateDirectory(imageDir);
-
-                    string fileName = Path.GetFileName(_currentImagePath);
-                    string destPath = Path.Combine(imageDir, fileName);
-                    File.Copy(_currentImagePath, destPath, true);
-                    finalImagePath = Path.Combine("Images", fileName);
-                }
-                else if (_currentMode == FormMode.Edit)
-                {
-                    finalImagePath = ((DataRowView)_bs.Current)["ANH"]?.ToString();
-                }
-
-                var p = new[] {
-                    DbHelper.Param("@ma", txtMaNV.Text.Trim()),
-                    DbHelper.Param("@ten", txtHoTen.Text.Trim()),
-                    DbHelper.Param("@diaChi", txtDiaChi.Text.Trim()),
-                    DbHelper.Param("@sdt", txtSDT.Text.Trim()),
-                    DbHelper.Param("@email", txtEmail.Text.Trim()),
-                    DbHelper.Param("@chucVu", cboChucVu.SelectedValue ?? (object)DBNull.Value),
-                    DbHelper.Param("@anh", (object)finalImagePath ?? DBNull.Value)
-                };
-
-                if (_currentMode == FormMode.New)
-                {
-                    string sql = "INSERT INTO dbo.NHANVIEN (MANV, HOTEN, DIACHI, SDT, EMAIL, CHUCVU, ANH) VALUES (@ma, @ten, @diaChi, @sdt, @email, @chucVu, @anh)";
-                    DbHelper.Execute(sql, p);
-                }
-                else // Edit
-                {
-                    string sql = "UPDATE dbo.NHANVIEN SET HOTEN=@ten, DIACHI=@diaChi, SDT=@sdt, EMAIL=@email, CHUCVU=@chucVu, ANH=@anh WHERE MANV=@ma";
-                    DbHelper.Execute(sql, p);
-                }
-
-                LoadData();
-                _bs.Position = _bs.Find("MANV", txtMaNV.Text.Trim());
-                SetFormMode(FormMode.View);
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("PRIMARY KEY"))
-                    MessageBox.Show("Mã nhân viên này đã tồn tại. Vui lòng chọn mã khác.", "Lỗi");
-                else
-                    MessageBox.Show("Lỗi khi lưu: " + ex.Message, "Lỗi");
-            }
+            isAdding = false;
+            SetInputMode(true);
+            txtHoTen.Focus();
         }
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (_bs.Current != null && MessageBox.Show("Bạn có chắc muốn xóa?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (dgvNhanVien.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn một nhân viên để xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Bạn có chắc chắn muốn xóa nhân viên này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 try
                 {
-                    DbHelper.Execute("DELETE FROM dbo.NHANVIEN WHERE MANV=@ma", DbHelper.Param("@ma", txtMaNV.Text));
+                    string maNV = dgvNhanVien.SelectedRows[0].Cells["MANV"].Value.ToString();
+                    string query = "DELETE FROM NHANVIEN WHERE MANV = @MaNV";
+                    DbHelper.Execute(query, DbHelper.Param("@MaNV", maNV));
+
                     LoadData();
+                    MessageBox.Show("Xóa nhân viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Không thể xóa nhân viên này. Có thể do đã có phát sinh giao dịch liên quan.\n\nChi tiết: " + ex.Message, "Lỗi ràng buộc dữ liệu");
+                    MessageBox.Show("Lỗi khi xóa: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+
+        private void btnLuu_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtMaNV.Text) || string.IsNullOrWhiteSpace(txtHoTen.Text))
+                {
+                    MessageBox.Show("Mã và Tên nhân viên không được để trống.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (isAdding)
+                {
+                    string query = @"
+                        INSERT INTO NHANVIEN (MANV, HOTEN, CHUCVU, DIACHI, SDT, EMAIL, ANH, HOATDONG)
+                        VALUES (@MaNV, @HoTen, @ChucVu, @DiaChi, @SDT, @Email, @Anh, @HoatDong)";
+                    DbHelper.Execute(query,
+                        DbHelper.Param("@MaNV", txtMaNV.Text),
+                        DbHelper.Param("@HoTen", txtHoTen.Text),
+                        DbHelper.Param("@ChucVu", cboChucVu.SelectedValue),
+                        DbHelper.Param("@DiaChi", txtDiaChi.Text),
+                        DbHelper.Param("@SDT", txtSDT.Text),
+                        DbHelper.Param("@Email", txtEmail.Text),
+                        DbHelper.Param("@Anh", currentImagePath),
+                        DbHelper.Param("@HoatDong", chkHoatDong.Checked)
+                    );
+                }
+                else
+                {
+                    string query = @"
+                        UPDATE NHANVIEN SET
+                            HOTEN = @HoTen, CHUCVU = @ChucVu, DIACHI = @DiaChi, SDT = @SDT, 
+                            EMAIL = @Email, ANH = @Anh, HOATDONG = @HoatDong
+                        WHERE MANV = @MaNV";
+                    DbHelper.Execute(query,
+                        DbHelper.Param("@HoTen", txtHoTen.Text),
+                        DbHelper.Param("@ChucVu", cboChucVu.SelectedValue),
+                        DbHelper.Param("@DiaChi", txtDiaChi.Text),
+                        DbHelper.Param("@SDT", txtSDT.Text),
+                        DbHelper.Param("@Email", txtEmail.Text),
+                        DbHelper.Param("@Anh", currentImagePath),
+                        DbHelper.Param("@HoatDong", chkHoatDong.Checked),
+                        DbHelper.Param("@MaNV", txtMaNV.Text)
+                    );
+                }
+                MessageBox.Show("Lưu dữ liệu thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                SetInputMode(false);
+                isAdding = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi lưu dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnHuy_Click(object sender, EventArgs e)
+        {
+            if (!isAdding)
+            {
+                dgvNhanVien_SelectionChanged(null, null);
+            }
+            else
+            {
+                ClearInputs();
+            }
+            SetInputMode(false);
+            isAdding = false;
+        }
+
+        private void btnBrowse_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg; *.jpeg; *.gif; *.bmp; *.png";
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                currentImagePath = openFile.FileName;
+                picHinhAnh.Image = new Bitmap(currentImagePath);
+            }
+        }
+
+        private void dgvNhanVien_SelectionChanged(object sender, EventArgs e)
+        {
+            if (!isAdding && dgvNhanVien.SelectedRows.Count > 0)
+            {
+                var row = dgvNhanVien.SelectedRows[0];
+                txtMaNV.Text = row.Cells["MANV"].Value?.ToString();
+                txtHoTen.Text = row.Cells["HOTEN"].Value?.ToString();
+                cboChucVu.SelectedValue = row.Cells["CHUCVU"].Value;
+                txtDiaChi.Text = row.Cells["DIACHI"].Value?.ToString();
+                txtSDT.Text = row.Cells["SDT"].Value?.ToString();
+                txtEmail.Text = row.Cells["EMAIL"].Value?.ToString();
+                chkHoatDong.Checked = row.Cells["HOATDONG"].Value != null && (bool)row.Cells["HOATDONG"].Value;
+
+                currentImagePath = row.Cells["ANH"].Value?.ToString();
+                if (!string.IsNullOrEmpty(currentImagePath) && File.Exists(currentImagePath))
+                {
+                    picHinhAnh.Image = Image.FromFile(currentImagePath);
+                }
+                else
+                {
+                    picHinhAnh.Image = null;
+                }
+            }
+        }
+
+        #endregion
     }
 }

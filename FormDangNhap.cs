@@ -1,22 +1,13 @@
-using DoAnLapTrinhQuanLy.Data;
 using System;
 using System.Data;
-using System.Drawing;
 using System.Windows.Forms;
+using DoAnLapTrinhQuanLy.Data;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public class UserData
-    {
-        public int ID { get; set; }
-        public string TaiKhoan { get; set; }
-        public string HoTen { get; set; }
-        public int MaQuyen { get; set; }
-        public string TenQuyen { get; set; }
-    }
-
     public partial class FormDangNhap : Form
     {
+        // Property để Program.cs có thể lấy thông tin user sau khi đăng nhập thành công
         public UserData AuthenticatedUser { get; private set; }
 
         public FormDangNhap()
@@ -24,73 +15,74 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             InitializeComponent();
         }
 
+        private void btnThoat_Click(object sender, EventArgs e)
+        {
+            // Nút thoát sẽ kết thúc toàn bộ ứng dụng
+            Application.Exit();
+        }
+
         private void btnDangNhap_Click(object sender, EventArgs e)
         {
-            var taiKhoan = txtTaiKhoan.Text.Trim();
-            var matKhau = txtMatKhau.Text.Trim();
+            string taiKhoan = txtTaiKhoan.Text;
+            string matKhau = txtMatKhau.Text;
 
             if (string.IsNullOrEmpty(taiKhoan) || string.IsNullOrEmpty(matKhau))
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập đầy đủ tài khoản và mật khẩu.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                // Logic đăng nhập đơn giản, so sánh mật khẩu thường
                 string query = @"
-                    SELECT U.ID, U.TAIKHOAN, U.HOTEN, U.MAQUYEN, Q.TENQUYEN
-                    FROM NGUOIDUNG U
-                    JOIN QUYENHAN Q ON U.MAQUYEN = Q.MAQUYEN
-                    WHERE U.TAIKHOAN=@tk AND U.MATKHAU=@mk AND U.HOATDONG=1";
+                    SELECT nd.TAIKHOAN, nd.MATKHAU, nd.HOTEN, qh.TENQUYEN 
+                    FROM NGUOIDUNG nd 
+                    JOIN QUYENHAN qh ON nd.MAQUYEN = qh.MAQUYEN 
+                    WHERE nd.TAIKHOAN = @TaiKhoan AND nd.MATKHAU = @MatKhau AND nd.HOATDONG = 1";
 
                 DataTable dt = DbHelper.Query(query,
-                    DbHelper.Param("@tk", taiKhoan),
-                    DbHelper.Param("@mk", matKhau));
+                                    DbHelper.Param("@TaiKhoan", taiKhoan),
+                                    DbHelper.Param("@MatKhau", matKhau));
 
                 if (dt.Rows.Count > 0)
                 {
-                    // Đăng nhập thành công
+                    DataRow row = dt.Rows[0];
                     AuthenticatedUser = new UserData
                     {
-                        ID = Convert.ToInt32(dt.Rows[0]["ID"]),
-                        TaiKhoan = dt.Rows[0]["TAIKHOAN"].ToString(),
-                        HoTen = dt.Rows[0]["HOTEN"].ToString(),
-                        MaQuyen = Convert.ToInt32(dt.Rows[0]["MAQUYEN"]),
-                        TenQuyen = dt.Rows[0]["TENQUYEN"].ToString()
+                        TaiKhoan = row["TAIKHOAN"].ToString(),
+                        MatKhau = row["MATKHAU"].ToString(),
+                        HoTen = row["HOTEN"].ToString(),
+                        TenQuyen = row["TENQUYEN"].ToString()
                     };
 
-                    this.DialogResult = DialogResult.OK;
+                    // === LƯU VÀO SESSION ===
+                    Session.LoggedInUser = this.AuthenticatedUser;
+
+                    this.DialogResult = DialogResult.OK; // Báo cho Program.cs là đăng nhập thành công
                     this.Close();
                 }
                 else
                 {
-                    MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Tài khoản hoặc mật khẩu không đúng, hoặc tài khoản đã bị khóa.", "Đăng nhập thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi kết nối hoặc truy vấn CSDL: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi kết nối hoặc truy vấn: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void chkHienMatKhau_CheckedChanged(object sender, EventArgs e)
+        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
         {
-            if (chkHienMatKhau.Checked) { txtMatKhau.PasswordChar = '\0'; }
-            else { txtMatKhau.PasswordChar = '●'; }
+            // Nếu checkbox được check, bỏ ký tự che mật khẩu. Nếu không, đặt lại.
+            if (chkShowPassword.Checked)
+            {
+                txtMatKhau.PasswordChar = '\0'; // Ký tự null để hiển thị text
+            }
+            else
+            {
+                txtMatKhau.PasswordChar = '●';
+            }
         }
-
-        private void btnThoat_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        #region Code để di chuyển cửa sổ không viền
-        private bool _dragging = false;
-        private Point _start_point = new Point(0, 0);
-        private void Movable_MouseDown(object sender, MouseEventArgs e) { _dragging = true; _start_point = new Point(e.X, e.Y); }
-        private void Movable_MouseUp(object sender, MouseEventArgs e) { _dragging = false; }
-        private void Movable_MouseMove(object sender, MouseEventArgs e) { if (_dragging) { Point p = PointToScreen(e.Location); Location = new Point(p.X - this._start_point.X, p.Y - this._start_point.Y); } }
-        #endregion
     }
 }
