@@ -1,4 +1,4 @@
-﻿namespace DoAnLapTrinhQuanLy.GuiLayer
+namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     partial class FormBaoCaoKho
     {
@@ -57,7 +57,7 @@
             this.chkXemChiTiet.Name = "chkXemChiTiet";
             this.chkXemChiTiet.Size = new System.Drawing.Size(157, 19);
             this.chkXemChiTiet.TabIndex = 7;
-            this.chkXemChiTiet.Text = "Xem chi tiết theo vật tư";
+            this.chkXemChiTiet.Text = "Xem chi ti?t theo v?t tu";
             this.chkXemChiTiet.UseVisualStyleBackColor = true;
             // 
             // cboDoiTac
@@ -76,7 +76,7 @@
             this.lblDoiTac.Name = "lblDoiTac";
             this.lblDoiTac.Size = new System.Drawing.Size(48, 15);
             this.lblDoiTac.TabIndex = 5;
-            this.lblDoiTac.Text = "Đối tác:";
+            this.lblDoiTac.Text = "�?i t�c:";
             // 
             // btnXemBaoCao
             // 
@@ -85,9 +85,9 @@
             this.btnXemBaoCao.Name = "btnXemBaoCao";
             this.btnXemBaoCao.Size = new System.Drawing.Size(147, 34);
             this.btnXemBaoCao.TabIndex = 4;
-            this.btnXemBaoCao.Text = "Xem Báo Cáo";
+            this.btnXemBaoCao.Text = "Xem B�o C�o";
             this.btnXemBaoCao.UseVisualStyleBackColor = true;
-            this.btnXemBaoCao.Click += new System.EventHandler(this.btnXemBaoCao_Click);
+            this.btnXemBaoCao.Click += new System.EventHandler(this.BtnXemBaoCao_Click);
             // 
             // dtpDenNgay
             // 
@@ -104,7 +104,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 15);
             this.label2.TabIndex = 2;
-            this.label2.Text = "Đến ngày:";
+            this.label2.Text = "�?n ng�y:";
             // 
             // dtpTuNgay
             // 
@@ -121,7 +121,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(52, 15);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Từ ngày:";
+            this.label1.Text = "T? ng�y:";
             // 
             // gridBaoCao
             // 
@@ -151,7 +151,7 @@
             this.staTongTien.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.staTongTien.Name = "staTongTien";
             this.staTongTien.Size = new System.Drawing.Size(70, 17);
-            this.staTongTien.Text = "Tổng tiền: 0";
+            this.staTongTien.Text = "T?ng ti?n: 0";
             // 
             // FormBaoCaoKho
             // 
@@ -163,7 +163,7 @@
             this.Controls.Add(this.panelTop);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "FormBaoCaoKho";
-            this.Text = "Báo Cáo Nhập - Xuất Kho";
+            this.Text = "B�o C�o Nh?p - Xu?t Kho";
             this.Load += new System.EventHandler(this.FormBaoCaoKho_Load);
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();

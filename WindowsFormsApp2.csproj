@@ -382,6 +382,7 @@
     <Compile Include="Session.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="UserData.cs" />
+    <Compile Include="ThemeManager.cs" />
     <EmbeddedResource Include="FormAttach.resx">
       <DependentUpon>FormAttach.cs</DependentUpon>
     </EmbeddedResource>

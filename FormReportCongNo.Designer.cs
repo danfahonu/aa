@@ -63,7 +63,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnXem.TabIndex = 8;
             this.btnXem.Text = "Xem Sổ";
             this.btnXem.UseVisualStyleBackColor = true;
-            this.btnXem.Click += new System.EventHandler(this.btnXem_Click);
+            this.btnXem.Click += new System.EventHandler(this.BtnXem_Click);
             // 
             // cboDoiTuong
             // 
@@ -125,7 +125,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.cboLoaiCongNo.Name = "cboLoaiCongNo";
             this.cboLoaiCongNo.Size = new System.Drawing.Size(185, 23);
             this.cboLoaiCongNo.TabIndex = 1;
-            this.cboLoaiCongNo.SelectedIndexChanged += new System.EventHandler(this.cboLoaiCongNo_SelectedIndexChanged);
+            this.cboLoaiCongNo.SelectedIndexChanged += new System.EventHandler(this.CboLoaiCongNo_SelectedIndexChanged);
             // 
             // label3
             // 

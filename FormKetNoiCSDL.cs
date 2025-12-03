@@ -66,7 +66,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Bỏ qua lỗi nếu chuỗi kết nối cũ bị lỗi
                 // MessageBox.Show("Lỗi đọc cấu hình cũ: " + ex.Message);

@@ -94,7 +94,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnGhiSo.TabIndex = 6;
             this.btnGhiSo.Text = "Ghi Sổ";
             this.btnGhiSo.UseVisualStyleBackColor = false;
-            this.btnGhiSo.Click += new System.EventHandler(this.btnGhiSo_Click);
+            this.btnGhiSo.Click += new System.EventHandler(this.BtnGhiSo_Click);
             // 
             // btnHuy
             // 
@@ -110,7 +110,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnHuy.TabIndex = 4;
             this.btnHuy.Text = "Hủy";
             this.btnHuy.UseVisualStyleBackColor = false;
-            this.btnHuy.Click += new System.EventHandler(this.btnHuy_Click);
+            this.btnHuy.Click += new System.EventHandler(this.BtnHuy_Click);
             // 
             // btnLuu
             // 
@@ -126,7 +126,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnLuu.TabIndex = 3;
             this.btnLuu.Text = "Lưu Nháp";
             this.btnLuu.UseVisualStyleBackColor = false;
-            this.btnLuu.Click += new System.EventHandler(this.btnLuu_Click);
+            this.btnLuu.Click += new System.EventHandler(this.BtnLuu_Click);
             // 
             // btnXoa
             // 
@@ -164,7 +164,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnThem.TabIndex = 0;
             this.btnThem.Text = "Lập Phiếu Mới";
             this.btnThem.UseVisualStyleBackColor = true;
-            this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
+            this.btnThem.Click += new System.EventHandler(this.BtnThem_Click);
             // 
             // tableLayoutPanel1
             // 

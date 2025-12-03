@@ -17,6 +17,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormKhachHang_Load(object sender, EventArgs e)
         {
+            ThemeManager.Apply(this);
             LoadData();
             SetInputMode(false); // Khóa giao diện khi mới mở
         }
@@ -71,7 +72,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #region Sự kiện
 
-        private void btnThem_Click(object sender, EventArgs e)
+        private void BtnThem_Click(object sender, EventArgs e)
         {
             isAdding = true;
             ClearInputs();
@@ -79,7 +80,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtMaKH.Focus();
         }
 
-        private void btnSua_Click(object sender, EventArgs e)
+        private void BtnSua_Click(object sender, EventArgs e)
         {
             if (dgvKhachHang.SelectedRows.Count == 0)
             {
@@ -91,7 +92,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtTenKH.Focus();
         }
 
-        private void btnXoa_Click(object sender, EventArgs e)
+        private void BtnXoa_Click(object sender, EventArgs e)
         {
             if (dgvKhachHang.SelectedRows.Count == 0)
             {
@@ -117,7 +118,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnLuu_Click(object sender, EventArgs e)
+        private void BtnLuu_Click(object sender, EventArgs e)
         {
             try
             {
@@ -169,11 +170,11 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnHuy_Click(object sender, EventArgs e)
+        private void BtnHuy_Click(object sender, EventArgs e)
         {
             if (!isAdding)
             {
-                dgvKhachHang_SelectionChanged(null, null);
+                DgvKhachHang_SelectionChanged(null, null);
             }
             else
             {
@@ -183,7 +184,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             isAdding = false;
         }
 
-        private void dgvKhachHang_SelectionChanged(object sender, EventArgs e)
+        private void DgvKhachHang_SelectionChanged(object sender, EventArgs e)
         {
             if (!isAdding && dgvKhachHang.SelectedRows.Count > 0)
             {

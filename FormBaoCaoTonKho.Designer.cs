@@ -54,6 +54,7 @@
             // 
             // pnlFilters
             // 
+            this.pnlFilters.Controls.Add(this.btnPrint);
             this.pnlFilters.Controls.Add(this.btnXemBaoCao);
             this.pnlFilters.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlFilters.Location = new System.Drawing.Point(0, 50);
@@ -76,6 +77,22 @@
             this.btnXemBaoCao.Text = "Xem Báo Cáo";
             this.btnXemBaoCao.UseVisualStyleBackColor = false;
             this.btnXemBaoCao.Click += new System.EventHandler(this.btnXemBaoCao_Click);
+            // 
+            // btnPrint
+            // 
+            this.btnPrint = new System.Windows.Forms.Button();
+            this.btnPrint.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
+            this.btnPrint.FlatAppearance.BorderSize = 0;
+            this.btnPrint.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPrint.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btnPrint.ForeColor = System.Drawing.Color.White;
+            this.btnPrint.Location = new System.Drawing.Point(150, 15);
+            this.btnPrint.Name = "btnPrint";
+            this.btnPrint.Size = new System.Drawing.Size(120, 30);
+            this.btnPrint.TabIndex = 1;
+            this.btnPrint.Text = "In Báo Cáo";
+            this.btnPrint.UseVisualStyleBackColor = false;
+            this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
             // 
             // dgvBaoCao
             // 
@@ -156,6 +173,7 @@
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Panel pnlFilters;
         private System.Windows.Forms.Button btnXemBaoCao;
+        private System.Windows.Forms.Button btnPrint;
         private System.Windows.Forms.DataGridView dgvBaoCao;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label1;

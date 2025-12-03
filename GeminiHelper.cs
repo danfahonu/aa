@@ -33,25 +33,38 @@ namespace DoAnLapTrinhQuanLy.Data
                     - Chỉ được trả lời bằng câu lệnh SQL, không giải thích gì thêm.
                     - Chỉ được tạo câu lệnh SELECT. Tuyệt đối không tạo câu lệnh UPDATE, DELETE, INSERT, DROP.
                     - Nếu không thể trả lời, hãy trả về chữ 'KHONG_THE_TRA_LOI'.
+                    - Luôn sử dụng N'...' cho các chuỗi ký tự tiếng Việt (Unicode).
 
                     Dưới đây là cấu trúc CSDL SALEGEARVN:
                     -- Bảng nhân sự và lương
-                    - NHANVIEN(MANV, HOTEN, CHUCVU, DIACHI, SDT, EMAIL)
+                    - NHANVIEN(MANV, HOTEN, CHUCVU, DIACHI, SDT, EMAIL, ANH, HOATDONG)
                     - HESOLUONG(CHUCVU, HESOLUONG)
-                    - BANGCHAMCONG(MANV, THANG, NAM, NGAYCONG)
-                    - TAMUNG(MANV, NGAY, SOTIEN)
+                    - BANGCHAMCONG(ID, MANV, THANG, NAM, NGAYCONG, GHICHU)
+                    - TAMUNG(ID, MANV, NGAY, SOTIEN, GHICHU)
+                    - PHIEU_YEUCAU_NHAPKHO(ID, NGAY_YEUCAU, MANV_YEUCAU, LYDO, TRANGTHAI, MANV_DUYET, NGAY_DUYET)
+                    
                     -- Bảng danh mục
-                    - DANHMUCKHACHHANG(MAKH, TENKH, DIACHI, SDT)
-                    - DM_NHACUNGCAP(MA_NCC, TEN_NCC, DIACHI_NCC, SDT)
-                    - DM_NHOMHANG(MANHOM, TENNHOM)
-                    - DM_HANGHOA(MAHH, TENHH, MANHOM, DVT, GIAVON, GIABAN, TONKHO)
+                    - DANHMUCKHACHHANG(MAKH, TENKH, DIACHI, SDT, EMAIL, GHICHU, NGAYTAO)
+                    - DM_NHACUNGCAP(MA_NCC, TEN_NCC, DIACHI_NCC, SDT, EMAIL, MSTHUE, GHICHU)
+                    - DM_NHOMHANG(MANHOM, TENNHOM, GHICHU)
+                    - DM_HANGHOA(MAHH, TENHH, MANHOM, DVT, GIAVON, GIABAN, TONKHO, ANH, ACTIVE)
+                    - DM_NGANHANG(MANH, TENNH, CHINHANH)
+                    - DM_TAIKHOAN_NGANHANG(ID, SO_TK, NGANHANG, CHU_TK, LOAI_TK, MA_DOITUONG)
+
                     -- Bảng nghiệp vụ kho
-                    - PHIEU(SOPHIEU, NGAYLAP, LOAI, MAKH, MA_NCC) với LOAI='N' là phiếu nhập, LOAI='X' là phiếu xuất.
-                    - PHIEU_CT(SOPHIEU, MAHH, SL, DONGIA, THANHTIEN)
+                    - PHIEU(SOPHIEU, NGAYLAP, LOAI, MAKH, MA_NCC, GHICHU, TRANGTHAI, SO_CT, MACT, ID_YEUCAU) 
+                      (LOAI='N': Nhập, LOAI='X': Xuất)
+                    - PHIEU_CT(ID, SOPHIEU, MAHH, SL, DONGIA, THANHTIEN, GIAVON)
+                    - KHO_CHITIET_TONKHO(ID, ID_PHIEUNHAP_CT, MAHH, NGAY_NHAP, SO_LUONG_NHAP, DON_GIA_NHAP, SO_LUONG_TON)
+                    - View: vw_TonKhoHienTai(MAHH, TON_HIEN_TAI)
+                    - View: vw_BanHangNgay(NGAYLAP, DOANH_THU, GIA_VON, LAI_GOP)
+
                     -- Bảng kế toán, tài chính
-                    - PHIEUTHUCHI(SOPTC, NGAYLAP, LOAI, MAKH, MA_NCC, SOTIEN, LYDO, MANV) với LOAI='T' là phiếu thu, LOAI='C' là phiếu chi.
-                    - BUTTOAN_KETOAN(NGAY_HT, DIEN_GIAI, TK_NO, TK_CO, SOTIEN)
-                    - DM_TAIKHOANKETOAN(SOTK, TENTK)
+                    - PHIEUTHUCHI(SOPTC, NGAYLAP, LOAI, MAKH, MA_NCC, SOTIEN, LYDO, MANV, SOTK_NO, SOTK_CO) 
+                      (LOAI='T': Thu, LOAI='C': Chi)
+                    - BUTTOAN_KETOAN(ID, NGAY_HT, SO_CT, MA_CT, DIEN_GIAI, TK_NO, TK_CO, SOTIEN)
+                    - DM_TAIKHOANKETOAN(SOTK, TENTK, CAP, TK_ME)
+                    - SODUDAU_KETOAN(NAM, SOTK, MATK2, DU_NO, DU_CO)
 
                     Ví dụ:
                     Câu hỏi: có bao nhiêu khách hàng?
@@ -62,6 +75,9 @@ namespace DoAnLapTrinhQuanLy.Data
 
                     Câu hỏi: tổng tiền nhập kho trong tháng 8 năm 2025 là bao nhiêu?
                     SQL: SELECT SUM(ct.THANHTIEN) FROM PHIEU p JOIN PHIEU_CT ct ON p.SOPHIEU = ct.SOPHIEU WHERE p.LOAI = 'N' AND MONTH(p.NGAYLAP) = 8 AND YEAR(p.NGAYLAP) = 2025
+                    
+                    Câu hỏi: Doanh thu ngày hôm nay?
+                    SQL: SELECT * FROM vw_BanHangNgay WHERE NGAYLAP = CAST(GETDATE() AS DATE)
                 ";
 
                 var googleAI = new GoogleAI(apiKey: ApiKey);

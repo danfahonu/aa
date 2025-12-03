@@ -1,4 +1,4 @@
-Ôªønamespace DoAnLapTrinhQuanLy.GuiLayer
+namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     partial class FormBaoCaoQuy
     {
@@ -60,7 +60,7 @@
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(211, 25);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "B√ÅO C√ÅO S·ªî K·∫æ TO√ÅN QU·ª∏";
+            this.lblTitle.Text = "B¡O C¡O S? K? TO¡N QU?";
             // 
             // pnlFilters
             // 
@@ -87,9 +87,9 @@
             this.btnXemBaoCao.Name = "btnXemBaoCao";
             this.btnXemBaoCao.Size = new System.Drawing.Size(120, 30);
             this.btnXemBaoCao.TabIndex = 4;
-            this.btnXemBaoCao.Text = "Xem B√°o C√°o";
+            this.btnXemBaoCao.Text = "Xem B·o C·o";
             this.btnXemBaoCao.UseVisualStyleBackColor = false;
-            this.btnXemBaoCao.Click += new System.EventHandler(this.btnXemBaoCao_Click);
+            this.btnXemBaoCao.Click += new System.EventHandler(this.BtnXemBaoCao_Click);
             // 
             // dtpDenNgay
             // 
@@ -107,7 +107,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(56, 13);
             this.label2.TabIndex = 2;
-            this.label2.Text = "ƒê·∫øn ng√†y:";
+            this.label2.Text = "–?n ng‡y:";
             // 
             // dtpTuNgay
             // 
@@ -125,7 +125,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(49, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "T·ª´ ng√†y:";
+            this.label1.Text = "T? ng‡y:";
             // 
             // dgvBaoCao
             // 
@@ -159,7 +159,7 @@
             this.panel1.TabIndex = 4;
             // 
             // lblTonCuoi
-            // ... (Code cho c√°c label n√†y)
+            // ... (Code cho c·c label n‡y)
             //
             // FormBaoCaoQuy
             // 
@@ -173,7 +173,7 @@
             this.Controls.Add(this.pnlHeader);
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "FormBaoCaoQuy";
-            this.Text = "B√°o C√°o Qu·ªπ Ti·ªÅn M·∫∑t";
+            this.Text = "B·o C·o Qu? Ti?n M?t";
             this.Load += new System.EventHandler(this.FormBaoCaoQuy_Load);
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();

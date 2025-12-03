@@ -63,20 +63,6 @@ namespace DoAnLapTrinhQuanLy.Data
             }, LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
-        /// <summary>
-        /// Tạo SqlParameter nhanh, tự động chuyển null thành DBNull.Value.
-        /// </summary>
-        /// <param name="name">Tên tham số (ví dụ: "@ID").</param>
-        /// <param name="value">Giá trị của tham số.</param>
-        /// <returns>Đối tượng SqlParameter.</returns>
-        public static SqlParameter Param(string name, object value)
-            => new SqlParameter(name, value ?? DBNull.Value);
-
-        // ========== PUBLIC API (CÁC PHƯƠNG THỨC CHÍNH) ==========
-
-        public static DataTable Query(string sql, params SqlParameter[] parameters)
-            => Query(sql, CommandType.Text, parameters);
-
         public static DataTable Proc(string procName, params SqlParameter[] parameters)
             => Query(procName, CommandType.StoredProcedure, parameters);
 
@@ -86,10 +72,17 @@ namespace DoAnLapTrinhQuanLy.Data
         public static int Execute(string sql, params SqlParameter[] parameters)
             => Execute(sql, CommandType.Text, parameters);
 
+        public static DataTable Query(string sql, params SqlParameter[] parameters)
+            => Query(sql, CommandType.Text, parameters);
+
+        public static SqlParameter Param(string name, object value)
+        {
+            return new SqlParameter(name, value ?? DBNull.Value);
+        }
+
         /// <summary>
         /// Thực hiện một chuỗi các thao tác trong một giao dịch (transaction).
-
-        // Dán phương thức mới này vào bất kỳ đâu bên trong class DbHelper
+        /// </summary>
         public static DataSet QueryDs(string sql, params SqlParameter[] parameters)
         {
             using (var conn = OpenConnection())
@@ -102,9 +95,9 @@ namespace DoAnLapTrinhQuanLy.Data
             }
         }
 
+        /// <summary>
+        /// Thực hiện transaction an toàn.
         /// </summary>
-        /// <param name="work">Hàm chứa logic CSDL.</param>
-        /// <returns>Số dòng bị ảnh hưởng.</returns>
         public static int ExecuteTran(Func<SqlConnection, SqlTransaction, int> work)
             => ExecuteTran(IsolationLevel.ReadCommitted, work);
 
@@ -209,7 +202,6 @@ namespace DoAnLapTrinhQuanLy.Data
             }
         }
 
-        // Dán phương thức mới này vào bất kỳ đâu bên trong class DbHelper
         public static DataTable QueryInTran(SqlConnection conn, SqlTransaction tran, string sql, params SqlParameter[] parameters)
         {
             using (var cmd = new SqlCommand(sql, conn, tran))
@@ -228,29 +220,40 @@ namespace DoAnLapTrinhQuanLy.Data
             }
         }
 
-        // Lấy chuỗi kết nối từ App.config
-        private static string GetConnectionString()
-        {
-            return ConfigurationManager.ConnectionStrings["Db"].ConnectionString;
-        }
-
-        // === HÀM CŨ CỦA BÀ (TRẢ VỀ SỐ DÒNG ẢNH HƯỞNG) ===
-        
-
         // === HÀM MỚI (TRẢ VỀ 1 GIÁ TRỊ DUY NHẤT) ===
         public static object ExecuteScalar(string sql, params SqlParameter[] parameters)
         {
-            using (var connection = new SqlConnection(GetConnectionString()))
-            {
-                using (var command = new SqlCommand(sql, connection))
-                {
-                    command.Parameters.AddRange(parameters);
-                    connection.Open();
-                    return command.ExecuteScalar();
-                }
-            }
+            return Scalar(sql, CommandType.Text, parameters);
         }
 
-        // Hàm tiện ích để tạo tham số
+        public static void CheckAndInitDatabase()
+        {
+            try
+            {
+                string checkTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'THONGTINCONGTY'";
+                int count = Convert.ToInt32(ExecuteScalar(checkTable));
+
+                if (count == 0)
+                {
+                    string createTable = @"
+                        CREATE TABLE THONGTINCONGTY (
+                            ID INT PRIMARY KEY IDENTITY(1,1),
+                            TENCONGTY NVARCHAR(100),
+                            DIACHI NVARCHAR(200),
+                            DIENTHOAI NVARCHAR(20),
+                            EMAIL NVARCHAR(50),
+                            WEBSITE NVARCHAR(50)
+                        );
+                        INSERT INTO THONGTINCONGTY (TENCONGTY, DIACHI, DIENTHOAI, EMAIL, WEBSITE)
+                        VALUES (N'CÔNG TY TNHH ABC', N'123 Đường ABC, TP.HCM', '0123456789', 'contact@abc.com', 'www.abc.com');";
+                    Execute(createTable);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error or ignore if db not ready
+                Console.WriteLine("DB Init Error: " + ex.Message);
+            }
+        }
     }
 }

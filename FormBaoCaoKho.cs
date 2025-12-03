@@ -1,152 +1,286 @@
-﻿using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Data;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Globalization;
+using System.Drawing;
+using System.Drawing.Printing;
 using System.Windows.Forms;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FormBaoCaoKho : Form
     {
-        private enum ReportType { Nhap, Xuat }
-        private ReportType _currentReportType;
+        private Button btnPrint;
 
-        public FormBaoCaoKho(string reportType)
+        public FormBaoCaoKho()
         {
             InitializeComponent();
-            _currentReportType = (reportType.ToUpper() == "NHAP") ? ReportType.Nhap : ReportType.Xuat;
+            ThemeManager.Apply(this);
+            InitializePrintButton();
+
+            // Adjust UI for Stock Card
+            this.Text = "Th? Kho (S? Chi Ti?t V?t Tu)";
+            lblDoiTac.Text = "Ch?n H�ng H�a:";
+            chkXemChiTiet.Visible = false; // Stock Card is always detailed
+        }
+
+        private void InitializePrintButton()
+        {
+            btnPrint = new Button();
+            btnPrint.Text = "In Th? Kho";
+            btnPrint.Size = new Size(120, 34);
+            btnPrint.Location = new Point(btnXemBaoCao.Location.X + btnXemBaoCao.Width + 10, btnXemBaoCao.Location.Y);
+            btnPrint.Click += BtnPrint_Click;
+            this.panelTop.Controls.Add(btnPrint);
+
+            // Apply theme
+            btnPrint.FlatStyle = FlatStyle.Flat;
+            btnPrint.FlatAppearance.BorderSize = 0;
+            btnPrint.BackColor = ThemeManager.PrimaryColor;
+            btnPrint.ForeColor = ThemeManager.LightText;
+            btnPrint.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            btnPrint.Cursor = Cursors.Hand;
         }
 
         private void FormBaoCaoKho_Load(object sender, EventArgs e)
         {
             dtpTuNgay.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            dtpDenNgay.Value = dtpTuNgay.Value.AddMonths(1).AddDays(-1);
-            LoadComboBoxDoiTac();
+            dtpDenNgay.Value = DateTime.Now;
+            LoadComboBoxHangHoa();
         }
 
-        private void LoadComboBoxDoiTac()
+        private void LoadComboBoxHangHoa()
         {
-            DataTable dt;
-            if (_currentReportType == ReportType.Nhap)
-            {
-                this.Text = "Báo Cáo Nhập Kho";
-                lblDoiTac.Text = "Nhà Cung Cấp:";
-                dt = DbHelper.Query("SELECT MA_NCC AS ID, TEN_NCC AS Name FROM dbo.DM_NHACUNGCAP ORDER BY TEN_NCC");
-            }
-            else // ReportType.Xuat
-            {
-                this.Text = "Báo Cáo Bán Hàng (Xuất Kho)";
-                lblDoiTac.Text = "Khách Hàng:";
-                dt = DbHelper.Query("SELECT MAKH AS ID, TENKH AS Name FROM dbo.DANHMUCKHACHHANG ORDER BY TENKH");
-            }
+            // Load list of active products
+            DataTable dt = DbHelper.Query("SELECT MAHH, TENHH FROM DM_HANGHOA WHERE ACTIVE = 1 ORDER BY TENHH");
 
-            // *** SỬA LỖI TẠI ĐÂY: Cho phép cột ID nhận giá trị NULL ***
-            dt.Columns["ID"].AllowDBNull = true;
-
-            // Thêm dòng "Tất cả" vào đầu danh sách
-            DataRow allRow = dt.NewRow();
-            allRow["ID"] = DBNull.Value;
-            allRow["Name"] = "-- Tất cả --";
-            dt.Rows.InsertAt(allRow, 0);
+            // Add custom display column
+            dt.Columns.Add("Display", typeof(string));
+            foreach (DataRow row in dt.Rows)
+            {
+                row["Display"] = $"{row["MAHH"]} - {row["TENHH"]}";
+            }
 
             cboDoiTac.DataSource = dt;
-            cboDoiTac.ValueMember = "ID";
-            cboDoiTac.DisplayMember = "Name";
+            cboDoiTac.ValueMember = "MAHH";
+            cboDoiTac.DisplayMember = "Display";
+
+            // Enable autocomplete
+            cboDoiTac.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            cboDoiTac.AutoCompleteSource = AutoCompleteSource.ListItems;
         }
 
-        private void btnXemBaoCao_Click(object sender, EventArgs e)
+        private void BtnXemBaoCao_Click(object sender, EventArgs e)
         {
+            if (cboDoiTac.SelectedValue == null)
+            {
+                MessageBox.Show("Vui l�ng ch?n h�ng h�a d? xem th? kho.", "Th�ng b�o");
+                return;
+            }
+
+            string maHH = cboDoiTac.SelectedValue.ToString();
+            DateTime tuNgay = dtpTuNgay.Value.Date;
+            DateTime denNgay = dtpDenNgay.Value.Date;
+
             try
             {
-                string sql;
-                string doiTacJoinField = (_currentReportType == ReportType.Nhap) ? "p.MA_NCC" : "p.MAKH";
-                string doiTacTable = (_currentReportType == ReportType.Nhap) ? "dbo.DM_NHACUNGCAP ncc" : "dbo.DANHMUCKHACHHANG kh";
-                string doiTacSelectField = (_currentReportType == ReportType.Nhap) ? "ncc.TEN_NCC" : "kh.TENKH";
-                string doiTacJoinCondition = (_currentReportType == ReportType.Nhap) ? "p.MA_NCC = ncc.MA_NCC" : "p.MAKH = kh.MAKH";
-                char phieuLoai = (_currentReportType == ReportType.Nhap) ? 'N' : 'X';
+                // 1. Calculate Opening Stock (T?n �?u)
+                string sqlTonDau = @"
+                    SELECT 
+                        (SELECT ISNULL(SUM(ct.SL), 0) 
+                         FROM PHIEU p JOIN PHIEU_CT ct ON p.SOPHIEU = ct.SOPHIEU 
+                         WHERE p.LOAI = 'N' AND p.TRANGTHAI = 1 AND ct.MAHH = @MaHH AND p.NGAYLAP < @TuNgay)
+                        -
+                        (SELECT ISNULL(SUM(ct.SL), 0) 
+                         FROM PHIEU p JOIN PHIEU_CT ct ON p.SOPHIEU = ct.SOPHIEU 
+                         WHERE p.LOAI = 'X' AND p.TRANGTHAI = 1 AND ct.MAHH = @MaHH AND p.NGAYLAP < @TuNgay)
+                ";
 
-                var parameters = new List<SqlParameter>
-                {
-                    DbHelper.Param("@TuNgay", dtpTuNgay.Value.Date),
-                    DbHelper.Param("@DenNgay", dtpDenNgay.Value.Date)
-                };
+                object objTonDau = DbHelper.Scalar(sqlTonDau,
+                    DbHelper.Param("@MaHH", maHH),
+                    DbHelper.Param("@TuNgay", tuNgay));
 
-                if (chkXemChiTiet.Checked)
+                int tonDau = Convert.ToInt32(objTonDau);
+
+                // 2. Get Transactions in Range
+                string sqlTrongKy = @"
+                    SELECT 
+                        p.NGAYLAP,
+                        p.SOPHIEU,
+                        p.LOAI,
+                        CASE WHEN p.LOAI = 'N' THEN N'Nh?p' ELSE N'Xu?t' END AS DIENGIAI,
+                        ct.SL,
+                        ct.DONGIA
+                    FROM PHIEU p 
+                    JOIN PHIEU_CT ct ON p.SOPHIEU = ct.SOPHIEU
+                    WHERE ct.MAHH = @MaHH 
+                      AND p.TRANGTHAI = 1
+                      AND p.NGAYLAP BETWEEN @TuNgay AND @DenNgay
+                    ORDER BY p.NGAYLAP, p.SOPHIEU
+                ";
+
+                DataTable dtTrongKy = DbHelper.Query(sqlTrongKy,
+                    DbHelper.Param("@MaHH", maHH),
+                    DbHelper.Param("@TuNgay", tuNgay),
+                    DbHelper.Param("@DenNgay", denNgay));
+
+                // 3. Process Data
+                DataTable dtResult = new DataTable();
+                dtResult.Columns.Add("Ng�y", typeof(DateTime));
+                dtResult.Columns.Add("S? Phi?u");
+                dtResult.Columns.Add("Di?n Gi?i");
+                dtResult.Columns.Add("Nh?p", typeof(int));
+                dtResult.Columns.Add("Xu?t", typeof(int));
+                dtResult.Columns.Add("T?n", typeof(int));
+
+                // Add Opening Row
+                dtResult.Rows.Add(tuNgay, "", "S? du d?u k?", 0, 0, tonDau);
+
+                int tonHienTai = tonDau;
+                int tongNhap = 0;
+                int tongXuat = 0;
+
+                foreach (DataRow row in dtTrongKy.Rows)
                 {
-                    sql = $@"
-                        SELECT 
-                            p.SOPHIEU AS [Số Phiếu], p.NGAYLAP AS [Ngày Lập],
-                            {doiTacSelectField} AS [Đối Tác], hh.MAHH AS [Mã Hàng],
-                            hh.TENHH AS [Tên Hàng Hóa], ct.SL AS [Số Lượng],
-                            ct.DONGIA AS [Đơn Giá], ct.THANHTIEN AS [Thành Tiền]
-                        FROM dbo.PHIEU p
-                        JOIN dbo.PHIEU_CT ct ON p.SOPHIEU = ct.SOPHIEU
-                        JOIN dbo.DM_HANGHOA hh ON ct.MAHH = hh.MAHH
-                        JOIN {doiTacTable} ON {doiTacJoinCondition}
-                        WHERE p.LOAI = '{phieuLoai}' AND p.NGAYLAP BETWEEN @TuNgay AND @DenNgay";
-                }
-                else
-                {
-                    sql = $@"
-                        SELECT 
-                            p.SOPHIEU AS [Số Phiếu], p.NGAYLAP AS [Ngày Lập],
-                            {doiTacSelectField} AS [Đối Tác],
-                            SUM(ct.THANHTIEN) AS [Tổng Tiền], p.GHICHU AS [Ghi Chú]
-                        FROM dbo.PHIEU p
-                        JOIN dbo.PHIEU_CT ct ON p.SOPHIEU = ct.SOPHIEU
-                        JOIN {doiTacTable} ON {doiTacJoinCondition}
-                        WHERE p.LOAI = '{phieuLoai}' AND p.NGAYLAP BETWEEN @TuNgay AND @DenNgay";
+                    string loai = row["LOAI"].ToString();
+                    int sl = Convert.ToInt32(row["SL"]);
+
+                    int nhap = (loai == "N") ? sl : 0;
+                    int xuat = (loai == "X") ? sl : 0;
+
+                    tonHienTai = tonHienTai + nhap - xuat;
+                    tongNhap += nhap;
+                    tongXuat += xuat;
+
+                    dtResult.Rows.Add(
+                        row["NGAYLAP"],
+                        row["SOPHIEU"],
+                        row["DIENGIAI"],
+                        nhap,
+                        xuat,
+                        tonHienTai
+                    );
                 }
 
-                if (cboDoiTac.SelectedValue != DBNull.Value && cboDoiTac.SelectedValue != null)
-                {
-                    sql += $" AND {doiTacJoinField} = @MaDoiTac";
-                    parameters.Add(DbHelper.Param("@MaDoiTac", cboDoiTac.SelectedValue));
-                }
-
-                if (chkXemChiTiet.Checked)
-                {
-                    sql += " ORDER BY p.NGAYLAP, p.SOPHIEU, hh.TENHH";
-                }
-                else
-                {
-                    sql += " GROUP BY p.SOPHIEU, p.NGAYLAP, " + doiTacSelectField + ", p.GHICHU ORDER BY p.NGAYLAP, p.SOPHIEU";
-                }
-
-                DataTable dtResult = DbHelper.Query(sql, parameters.ToArray());
                 gridBaoCao.DataSource = dtResult;
+                FormatGrid();
 
-                string colTongTien = chkXemChiTiet.Checked ? "Thành Tiền" : "Tổng Tiền";
-                decimal tongTien = 0;
-                foreach (DataRow row in dtResult.Rows)
-                {
-                    tongTien += Convert.ToDecimal(row[colTongTien]);
-                }
-                staTongTien.Text = $"Tổng cộng: {tongTien.ToString("N0", new CultureInfo("vi-VN"))} đ";
-
-                FormatGrid(colTongTien);
+                // Update Status
+                staTongTien.Text = $"T?n d?u: {tonDau:N0} | Nh?p: {tongNhap:N0} | Xu?t: {tongXuat:N0} | T?n cu?i: {tonHienTai:N0}";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi xem báo cáo: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("L?i t?i th? kho: " + ex.Message, "L?i");
             }
         }
 
-        private void FormatGrid(string colTongTien)
+        private void FormatGrid()
         {
-            if (gridBaoCao.Columns.Contains(colTongTien))
-            {
-                gridBaoCao.Columns[colTongTien].DefaultCellStyle.Format = "N0";
-                gridBaoCao.Columns[colTongTien].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-            if (gridBaoCao.Columns.Contains("Đơn Giá"))
-            {
-                gridBaoCao.Columns["Đơn Giá"].DefaultCellStyle.Format = "N0";
-                gridBaoCao.Columns["Đơn Giá"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
+            if (gridBaoCao.Columns.Count == 0) return;
+
+            var numberFormat = new DataGridViewCellStyle { Format = "N0", Alignment = DataGridViewContentAlignment.MiddleRight };
+            var boldFont = new Font("Segoe UI", 9F, FontStyle.Bold);
+
+            gridBaoCao.Columns["Nh?p"].DefaultCellStyle = numberFormat;
+            gridBaoCao.Columns["Xu?t"].DefaultCellStyle = numberFormat;
+            gridBaoCao.Columns["T?n"].DefaultCellStyle = numberFormat;
+            gridBaoCao.Columns["T?n"].DefaultCellStyle.Font = boldFont;
+
+            gridBaoCao.Columns["Di?n Gi?i"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             gridBaoCao.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+        }
+
+        private void BtnPrint_Click(object sender, EventArgs e)
+        {
+            if (gridBaoCao.Rows.Count == 0) return;
+
+            PrintDocument pd = new PrintDocument();
+            pd.PrintPage += Pd_PrintPage;
+
+            PrintPreviewDialog ppd = new PrintPreviewDialog();
+            ppd.Document = pd;
+            ppd.WindowState = FormWindowState.Maximized;
+            ppd.ShowDialog();
+        }
+
+        private void Pd_PrintPage(object sender, PrintPageEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            Font titleFont = new Font("Segoe UI", 16, FontStyle.Bold);
+            Font headerFont = new Font("Segoe UI", 10, FontStyle.Bold);
+            Font contentFont = new Font("Segoe UI", 10);
+
+            float y = 50;
+            // float margin = 50; // Removed unused variable
+
+            // Title
+            string title = "TH? KHO";
+            SizeF titleSize = g.MeasureString(title, titleFont);
+            g.DrawString(title, titleFont, Brushes.Black, (e.PageBounds.Width - titleSize.Width) / 2, y);
+            y += 30;
+
+            // Subtitle
+            string subTitle = cboDoiTac.Text;
+            SizeF subSize = g.MeasureString(subTitle, headerFont);
+            g.DrawString(subTitle, headerFont, Brushes.Black, (e.PageBounds.Width - subSize.Width) / 2, y);
+            y += 30;
+
+            string dateRange = $"T? ng�y {dtpTuNgay.Value:dd/MM/yyyy} d?n ng�y {dtpDenNgay.Value:dd/MM/yyyy}";
+            SizeF dateSize = g.MeasureString(dateRange, contentFont);
+            g.DrawString(dateRange, contentFont, Brushes.Black, (e.PageBounds.Width - dateSize.Width) / 2, y);
+            y += 40;
+
+            // Table Header
+            float[] colWidths = { 100, 100, 150, 80, 80, 80 };
+            string[] headers = { "Ng�y", "S? Phi?u", "Di?n Gi?i", "Nh?p", "Xu?t", "T?n" };
+            float x = (e.PageBounds.Width - 600) / 2; // Center table (approx width 600)
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                g.FillRectangle(new SolidBrush(ThemeManager.PrimaryColor), x, y, colWidths[i], 30);
+                g.DrawRectangle(Pens.Black, x, y, colWidths[i], 30);
+                g.DrawString(headers[i], headerFont, Brushes.White, x + 5, y + 5);
+                x += colWidths[i];
+            }
+            y += 30;
+
+            // Table Content
+            if (gridBaoCao.DataSource != null)
+            {
+                DataTable dt = (DataTable)gridBaoCao.DataSource;
+                foreach (DataRow row in dt.Rows)
+                {
+                    x = (e.PageBounds.Width - 600) / 2;
+
+                    string ngay = row["Ng�y"] != DBNull.Value ? Convert.ToDateTime(row["Ng�y"]).ToString("dd/MM/yyyy") : "";
+
+                    string[] values = {
+                        ngay,
+                        row["S? Phi?u"].ToString(),
+                        row["Di?n Gi?i"].ToString(),
+                        Convert.ToInt32(row["Nh?p"]).ToString("N0"),
+                        Convert.ToInt32(row["Xu?t"]).ToString("N0"),
+                        Convert.ToInt32(row["T?n"]).ToString("N0")
+                    };
+
+                    float rowHeight = 25;
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        g.DrawRectangle(Pens.Black, x, y, colWidths[i], rowHeight);
+
+                        StringFormat format = new StringFormat();
+                        format.Alignment = (i >= 3) ? StringAlignment.Far : StringAlignment.Near;
+                        format.LineAlignment = StringAlignment.Center;
+
+                        RectangleF rect = new RectangleF(x + 5, y, colWidths[i] - 10, rowHeight);
+                        g.DrawString(values[i], contentFont, Brushes.Black, rect, format);
+
+                        x += colWidths[i];
+                    }
+                    y += rowHeight;
+                }
+            }
         }
     }
 }

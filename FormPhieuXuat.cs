@@ -18,6 +18,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormPhieuXuat_Load(object sender, EventArgs e)
         {
+            ThemeManager.Apply(this);
             LoadComboBoxKhachHang();
             SetupDataGridViewComboBox();
             SetInputMode(false);
@@ -46,16 +47,28 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         {
             try
             {
+                // Remove existing text column if it exists (auto-generated or from designer)
+                if (dgvPhieuXuat.Columns.Contains("MAHH"))
+                {
+                    dgvPhieuXuat.Columns.Remove("MAHH");
+                }
+
+                DataGridViewComboBoxColumn cmbCol = new DataGridViewComboBoxColumn();
+                cmbCol.HeaderText = "Hàng Hóa";
+                cmbCol.Name = "MAHH";
+                cmbCol.DataPropertyName = "MAHH"; // Bind to DataTable column if bound, or use as value holder
+
                 string query = "SELECT MAHH, TENHH FROM DM_HANGHOA WHERE ACTIVE = 1";
                 DataTable dt = DbHelper.Query(query);
 
-                DataGridViewComboBoxColumn cmbCol = dgvPhieuXuat.Columns["MAHH"] as DataGridViewComboBoxColumn;
-                if (cmbCol != null)
-                {
-                    cmbCol.DataSource = dt;
-                    cmbCol.DisplayMember = "TENHH";
-                    cmbCol.ValueMember = "MAHH";
-                }
+                cmbCol.DataSource = dt;
+                cmbCol.DisplayMember = "TENHH";
+                cmbCol.ValueMember = "MAHH";
+                cmbCol.Width = 200;
+                cmbCol.AutoComplete = true;
+
+                // Add to grid at first position
+                dgvPhieuXuat.Columns.Insert(0, cmbCol);
             }
             catch (Exception ex)
             {
@@ -95,7 +108,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #region Sự kiện
 
-        private void btnThem_Click(object sender, EventArgs e)
+        public void BtnThem_Click(object sender, EventArgs e)
         {
             isAdding = true;
             ClearInputs();
@@ -103,7 +116,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             cboKhachHang.Focus();
         }
 
-        private void btnLuu_Click(object sender, EventArgs e)
+        public void BtnLuu_Click(object sender, EventArgs e)
         {
             try
             {
@@ -171,7 +184,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnGhiSo_Click(object sender, EventArgs e)
+        public void BtnGhiSo_Click(object sender, EventArgs e)
         {
             if (currentSoPhieu == -1)
             {
@@ -269,7 +282,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void dgvPhieuXuat_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        public void DgvPhieuXuat_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
             DataGridViewRow row = dgvPhieuXuat.Rows[e.RowIndex];
@@ -302,7 +315,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnHuy_Click(object sender, EventArgs e)
+        public void BtnHuy_Click(object sender, EventArgs e)
         {
             ClearInputs();
             SetInputMode(false);

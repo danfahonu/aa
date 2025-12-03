@@ -18,10 +18,18 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormQuanLyHeThong_Load(object sender, EventArgs e)
         {
-            LoadDataNguoiDung();
-            LoadComboBoxQuyen();
-            LoadComboBoxNhanVien();
-            SetInputMode(false);
+            try
+            {
+                ThemeManager.Apply(this);
+                LoadDataNguoiDung();
+                LoadComboBoxQuyen();
+                LoadComboBoxNhanVien();
+                SetInputMode(false);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải form: " + ex.Message);
+            }
         }
 
         #region Xử lý dữ liệu và ComboBox
@@ -53,6 +61,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 cboQuyen.DataSource = dt;
                 cboQuyen.DisplayMember = "TENQUYEN";
                 cboQuyen.ValueMember = "MAQUYEN";
+                cboQuyen.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
@@ -67,14 +76,20 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 string query = "SELECT MANV, HOTEN FROM NHANVIEN";
                 DataTable dt = DbHelper.Query(query);
 
+                // Thêm dòng "Không chọn" (cho tài khoản nội bộ không liên kết nhân viên)
+                if (dt.Columns.Contains("MANV"))
+                {
+                    dt.Columns["MANV"].AllowDBNull = true;
+                }
                 DataRow dr = dt.NewRow();
                 dr["MANV"] = DBNull.Value;
-                dr["HOTEN"] = "(Không chọn/Tài khoản nội bộ)";
+                dr["HOTEN"] = "--- Không chọn / Tài khoản nội bộ ---";
                 dt.Rows.InsertAt(dr, 0);
 
                 cboNhanVien.DataSource = dt;
                 cboNhanVien.DisplayMember = "HOTEN";
                 cboNhanVien.ValueMember = "MANV";
+                cboNhanVien.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -92,10 +107,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             chkHoatDong.Checked = true;
             selectedId = -1;
         }
-
-        #endregion
-
-        #region Quản lý trạng thái giao diện (UX)
 
         private void SetInputMode(bool enable)
         {
@@ -117,7 +128,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #region Sự kiện
 
-        private void dgvNguoiDung_SelectionChanged(object sender, EventArgs e)
+        private void DgvNguoiDung_SelectionChanged(object sender, EventArgs e)
         {
             if (!isAdding && dgvNguoiDung.SelectedRows.Count > 0)
             {
@@ -144,7 +155,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnThem_Click(object sender, EventArgs e)
+        private void BtnThem_Click(object sender, EventArgs e)
         {
             isAdding = true;
             ClearInputs();
@@ -152,7 +163,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtTaiKhoan.Focus();
         }
 
-        private void btnSua_Click(object sender, EventArgs e)
+        private void BtnSua_Click(object sender, EventArgs e)
         {
             if (selectedId == -1)
             {
@@ -169,7 +180,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtHoTen.Focus();
         }
 
-        private void btnXoa_Click(object sender, EventArgs e)
+        private void BtnXoa_Click(object sender, EventArgs e)
         {
             if (selectedId == -1)
             {
@@ -200,7 +211,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnLuu_Click(object sender, EventArgs e)
+        private void BtnLuu_Click(object sender, EventArgs e)
         {
             try
             {
@@ -274,11 +285,11 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnHuy_Click(object sender, EventArgs e)
+        private void BtnHuy_Click(object sender, EventArgs e)
         {
             if (!isAdding && dgvNguoiDung.SelectedRows.Count > 0)
             {
-                dgvNguoiDung_SelectionChanged(null, null);
+                DgvNguoiDung_SelectionChanged(null, null);
             }
             else
             {

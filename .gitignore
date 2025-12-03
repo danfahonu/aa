@@ -1,2 +1,9 @@
 # Ignore Visual Studio temporary files
 .vs/
+bin/
+obj/
+packages/
+*.user
+App.config
+*.suo
+*.log

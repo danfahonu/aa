@@ -90,7 +90,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnDangNhap.TabIndex = 5;
             this.btnDangNhap.Text = "Đăng nhập";
             this.btnDangNhap.UseVisualStyleBackColor = false;
-            this.btnDangNhap.Click += new System.EventHandler(this.btnDangNhap_Click);
+            this.btnDangNhap.Click += new System.EventHandler(this.BtnDangNhap_Click);
             // 
             // btnThoat
             // 
@@ -105,7 +105,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnThoat.TabIndex = 6;
             this.btnThoat.Text = "X";
             this.btnThoat.UseVisualStyleBackColor = false;
-            this.btnThoat.Click += new System.EventHandler(this.btnThoat_Click);
+            this.btnThoat.Click += new System.EventHandler(this.BtnThoat_Click);
             // 
             // chkShowPassword
             // 
@@ -117,7 +117,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.chkShowPassword.TabIndex = 7;
             this.chkShowPassword.Text = "Hiện mật khẩu";
             this.chkShowPassword.UseVisualStyleBackColor = true;
-            this.chkShowPassword.CheckedChanged += new System.EventHandler(this.chkShowPassword_CheckedChanged);
+            this.chkShowPassword.CheckedChanged += new System.EventHandler(this.ChkShowPassword_CheckedChanged);
             // 
             // FormDangNhap
             // 
@@ -138,6 +138,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.Name = "FormDangNhap";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Đăng Nhập";
+            this.Load += new System.EventHandler(this.FormDangNhap_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
         }

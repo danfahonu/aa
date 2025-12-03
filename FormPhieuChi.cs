@@ -18,6 +18,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormPhieuChi_Load(object sender, EventArgs e)
         {
+            ThemeManager.Apply(this);
             LoadComboBoxNhaCungCap();
             LoadComboBoxTaiKhoan();
             SetInputMode(false);
@@ -93,7 +94,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #region Sự kiện
 
-        private void btnThem_Click(object sender, EventArgs e)
+        public void BtnThem_Click(object sender, EventArgs e)
         {
             isAdding = true;
             ClearInputs();
@@ -101,7 +102,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             cboNhaCungCap.Focus();
         }
 
-        private void btnLuu_Click(object sender, EventArgs e)
+        public void BtnLuu_Click(object sender, EventArgs e)
         {
             try
             {
@@ -157,7 +158,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnGhiSo_Click(object sender, EventArgs e)
+        public void BtnGhiSo_Click(object sender, EventArgs e)
         {
             if (currentSoPhieu == -1)
             {
@@ -198,7 +199,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        private void btnHuy_Click(object sender, EventArgs e)
+        public void BtnHuy_Click(object sender, EventArgs e)
         {
             ClearInputs();
             SetInputMode(false);

@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Windows.Forms;
 using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer // (Giữ namespace của bà)
 {
@@ -14,12 +15,24 @@ namespace DoAnLapTrinhQuanLy.GuiLayer // (Giữ namespace của bà)
             InitializeComponent();
         }
 
-        private void btnThoat_Click(object sender, EventArgs e)
+        private void FormDangNhap_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                ThemeManager.Apply(this);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải form: " + ex.Message);
+            }
+        }
+
+        private void BtnThoat_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
-        private void btnDangNhap_Click(object sender, EventArgs e)
+        private void BtnDangNhap_Click(object sender, EventArgs e)
         {
             string taiKhoan = txtTaiKhoan.Text;
             string matKhau = txtMatKhau.Text;
@@ -72,7 +85,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer // (Giữ namespace của bà)
             }
         }
 
-        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
+        private void ChkShowPassword_CheckedChanged(object sender, EventArgs e)
         {
             if (chkShowPassword.Checked)
             {

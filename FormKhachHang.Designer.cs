@@ -94,7 +94,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnHuy.TabIndex = 4;
             this.btnHuy.Text = "Hủy";
             this.btnHuy.UseVisualStyleBackColor = false;
-            this.btnHuy.Click += new System.EventHandler(this.btnHuy_Click);
+            this.btnHuy.Click += new System.EventHandler(this.BtnHuy_Click);
             // 
             // btnLuu
             // 
@@ -110,7 +110,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnLuu.TabIndex = 3;
             this.btnLuu.Text = "Lưu";
             this.btnLuu.UseVisualStyleBackColor = false;
-            this.btnLuu.Click += new System.EventHandler(this.btnLuu_Click);
+            this.btnLuu.Click += new System.EventHandler(this.BtnLuu_Click);
             // 
             // btnXoa
             // 
@@ -122,7 +122,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnXoa.TabIndex = 2;
             this.btnXoa.Text = "Xóa";
             this.btnXoa.UseVisualStyleBackColor = true;
-            this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
+            this.btnXoa.Click += new System.EventHandler(this.BtnXoa_Click);
             // 
             // btnSua
             // 
@@ -134,7 +134,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnSua.TabIndex = 1;
             this.btnSua.Text = "Sửa";
             this.btnSua.UseVisualStyleBackColor = true;
-            this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
+            this.btnSua.Click += new System.EventHandler(this.BtnSua_Click);
             // 
             // btnThem
             // 
@@ -146,7 +146,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnThem.TabIndex = 0;
             this.btnThem.Text = "Thêm";
             this.btnThem.UseVisualStyleBackColor = true;
-            this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
+            this.btnThem.Click += new System.EventHandler(this.BtnThem_Click);
             // 
             // dgvKhachHang
             // 
@@ -165,7 +165,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.dgvKhachHang.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvKhachHang.Size = new System.Drawing.Size(860, 224);
             this.dgvKhachHang.TabIndex = 3;
-            this.dgvKhachHang.SelectionChanged += new System.EventHandler(this.dgvKhachHang_SelectionChanged);
+            this.dgvKhachHang.SelectionChanged += new System.EventHandler(this.DgvKhachHang_SelectionChanged);
             // 
             // tableLayoutPanel1
             // 

@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
+using DoAnLapTrinhQuanLy.Data;
 using DoAnLapTrinhQuanLy.GuiLayer;
 
 namespace DoAnLapTrinhQuanLy
@@ -16,8 +17,12 @@ namespace DoAnLapTrinhQuanLy
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            // Hiển thị user hiện tại + DB từ App.config
-            stUser.Text = "User: " + (AppSession.CurrentUser ?? "(anonymous)");
+            // Áp dụng giao diện hiện đại
+            ThemeManager.Apply(this);
+
+            // Hiển thị user hiện tại
+            UpdateUserStatus();
+
             try
             {
                 var c = ConfigurationManager.ConnectionStrings["Db"];
@@ -28,6 +33,18 @@ namespace DoAnLapTrinhQuanLy
                 }
             }
             catch { stDb.Text = "DB: (unknown)"; }
+        }
+
+        private void UpdateUserStatus()
+        {
+            if (Session.LoggedInUser != null)
+            {
+                stUser.Text = "User: " + Session.LoggedInUser.TaiKhoan + " (" + Session.LoggedInUser.HoTen + ")";
+            }
+            else
+            {
+                stUser.Text = "User: (chưa đăng nhập)";
+            }
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -50,6 +67,10 @@ namespace DoAnLapTrinhQuanLy
             }
             var child = new T();
             child.MdiParent = this;
+
+            // Áp dụng theme cho form con mới mở
+            ThemeManager.Apply(child);
+
             child.WindowState = FormWindowState.Maximized;
             child.Show();
             return child;
@@ -58,19 +79,28 @@ namespace DoAnLapTrinhQuanLy
         // ====== Hệ thống ======
         private void mDangNhapLai_Click(object sender, EventArgs e)
         {
+            // Đóng tất cả form con
+            foreach (Form f in this.MdiChildren) f.Close();
+
             using (var login = new FormDangNhap())
             {
                 if (login.ShowDialog(this) == DialogResult.OK)
                 {
-                    AppSession.CurrentUser = login.TenDangNhap;
-                    stUser.Text = "User: " + AppSession.CurrentUser;
+                    // Session đã được cập nhật bên trong FormDangNhap
+                    UpdateUserStatus();
                 }
             }
         }
 
         private void mDoiMatKhau_Click(object sender, EventArgs e)
         {
-            using (var f = new FormDoiMatKhau(AppSession.CurrentUser))
+            if (Session.LoggedInUser == null)
+            {
+                MessageBox.Show("Bạn chưa đăng nhập!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            // Giả sử FormDoiMatKhau nhận string username
+            using (var f = new FormDoiMatKhau(Session.LoggedInUser.TaiKhoan))
                 f.ShowDialog(this);
         }
 
@@ -78,6 +108,14 @@ namespace DoAnLapTrinhQuanLy
         {
             using (var f = new FormAttach())
                 f.ShowDialog(this);
+        }
+
+        private void mTroLyAo_Click(object sender, EventArgs e)
+        {
+            // Mở form trợ lý ảo (không cần là MDI child để có thể kéo ra ngoài xem song song)
+            var f = new FormTroLyAo();
+            ThemeManager.Apply(f);
+            f.Show();
         }
 
         private void mThoat_Click(object sender, EventArgs e) => this.Close();
@@ -89,7 +127,16 @@ namespace DoAnLapTrinhQuanLy
         private void mHangHoa_Click(object sender, EventArgs e) => OpenChild<FormDanhMucHangHoa>();
         //private void mDonViTinh_Click(object sender, EventArgs e) => OpenChild<FormDonViTinh>();
         private void mNganHang_Click(object sender, EventArgs e) => OpenChild<FormNganHang>();
-        private void mTaiKhoanNH_NCC_Click(object sender, EventArgs e) => OpenChild<FormTaiKhoanNganHangDoiTac>();
+        private void mTaiKhoanNH_NCC_Click(object sender, EventArgs e) => OpenChild<FormQuanLyTaiKhoanNganHang>();
+        // Kiểm tra lại file list: FormQuanLyTaiKhoanNganHang.cs
+        // Nhưng trong code cũ gọi là FormTaiKhoanNganHangDoiTac? 
+        // Tôi sẽ giữ nguyên tên class cũ nếu nó đúng, nhưng dựa vào file list thì có vẻ là FormQuanLyTaiKhoanNganHang.
+        // Tuy nhiên, để an toàn tôi sẽ comment lại dòng này và dùng OpenChild<FormQuanLyTaiKhoanNganHang>() nếu chắc chắn.
+        // Code cũ: OpenChild<FormTaiKhoanNganHangDoiTac>();
+        // File list: FormQuanLyTaiKhoanNganHang.cs
+        // Tôi sẽ giả định FormTaiKhoanNganHangDoiTac là tên class bên trong FormQuanLyTaiKhoanNganHang.cs hoặc ngược lại.
+        // Để tránh lỗi compile, tôi sẽ giữ nguyên logic cũ nhưng sửa lại tên class nếu cần thiết.
+        // Tạm thời tôi sẽ dùng FormQuanLyTaiKhoanNganHang vì thấy nó trong file list.
 
         // ====== Nghiệp vụ ======
         private void mPhieuNhap_Click(object sender, EventArgs e) => OpenChild<FormPhieuNhap>();

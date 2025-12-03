@@ -16,47 +16,62 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void FormDashboard_Load(object sender, EventArgs e)
         {
-            LoadKpiData();
-            LoadCategoryChart();
-            LoadTopProductsGrids();
+            try
+            {
+                ThemeManager.Apply(this);
+
+                // Update Labels for new KPIs
+                label1.Text = "Doanh Số Hôm Nay";
+                label3.Text = "Tiền Mặt Hiện Có";
+                label5.Text = "Giá Trị Tồn Kho";
+                label7.Text = "Hàng Sắp Hết (<10)";
+
+                LoadKpiData();
+                LoadCategoryChart();
+                LoadTopProductsGrids();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải Dashboard: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadKpiData()
         {
             try
             {
-                // 1. Tổng giá trị tồn kho (tính chính xác từ các lô FIFO)
-                string valueQuery = "SELECT ISNULL(SUM(SO_LUONG_TON * DON_GIA_NHAP), 0) FROM KHO_CHITIET_TONKHO";
-                object totalValue = DbHelper.Scalar(valueQuery);
-                lblGiaTriTon.Text = Convert.ToDecimal(totalValue).ToString("N0");
+                // 1. Doanh số hôm nay
+                // Logic: Sum THANHTIEN from PHIEU_CT where PHIEU is Export (X) and Date is Today
+                string salesQuery = @"
+                    SELECT ISNULL(SUM(ct.THANHTIEN), 0)
+                    FROM PHIEU p
+                    JOIN PHIEU_CT ct ON p.SOPHIEU = ct.SOPHIEU
+                    WHERE p.LOAI = 'X' AND p.TRANGTHAI = 1 AND p.NGAYLAP = CAST(GETDATE() AS DATE)";
+                object salesObj = DbHelper.Scalar(salesQuery);
+                lblGiaTriTon.Text = Convert.ToDecimal(salesObj).ToString("N0"); // Repurposed label
 
-                // 2. Tổng số mặt hàng (SKU) đang quản lý
-                string skuQuery = "SELECT COUNT(MAHH) FROM DM_HANGHOA WHERE ACTIVE = 1";
-                object totalSku = DbHelper.Scalar(skuQuery);
-                lblSoMatHang.Text = Convert.ToInt32(totalSku).ToString();
+                // 2. Tiền mặt hiện có
+                // Logic: Sum Thu - Sum Chi from PHIEUTHUCHI
+                string cashQuery = "SELECT ISNULL(SUM(CASE WHEN LOAI = 'T' THEN SOTIEN ELSE -SOTIEN END), 0) FROM PHIEUTHUCHI";
+                object cashObj = DbHelper.Scalar(cashQuery);
+                lblSoMatHang.Text = Convert.ToDecimal(cashObj).ToString("N0"); // Repurposed label
 
-                // 3. Tổng số lượng đơn vị sản phẩm trong kho
-                string unitQuery = "SELECT ISNULL(SUM(TONKHO), 0) FROM DM_HANGHOA WHERE ACTIVE = 1";
-                object totalUnits = DbHelper.Scalar(unitQuery);
-                lblTongTon.Text = Convert.ToInt32(totalUnits).ToString("N0");
+                // 3. Giá trị tồn kho (Keep existing logic but optimized)
+                // Logic: Sum TONKHO * GIAVON from DM_HANGHOA (assuming GIAVON is updated) 
+                // OR Sum SO_LUONG_TON * DON_GIA_NHAP from KHO_CHITIET_TONKHO
+                string stockValueQuery = "SELECT ISNULL(SUM(SO_LUONG_TON * DON_GIA_NHAP), 0) FROM KHO_CHITIET_TONKHO";
+                object stockValueObj = DbHelper.Scalar(stockValueQuery);
+                lblTongTon.Text = Convert.ToDecimal(stockValueObj).ToString("N0");
 
-                // 4. Số mặt hàng dưới mức tồn tối thiểu (cần có cột TONKHO_TOITHIEU trong DM_HANGHOA)
-                // Nếu chưa có, bà có thể bỏ qua phần này hoặc mặc định nó bằng 0
-                try
-                {
-                    string lowStockQuery = "SELECT COUNT(MAHH) FROM DM_HANGHOA WHERE ACTIVE = 1 AND TONKHO < TONKHO_TOITHIEU";
-                    object lowStockCount = DbHelper.Scalar(lowStockQuery);
-                    lblHangSapHet.Text = Convert.ToInt32(lowStockCount).ToString();
-                }
-                catch
-                {
-                    // Nếu bảng DM_HANGHOA chưa có cột TONKHO_TOITHIEU thì sẽ báo lỗi, ta bắt lỗi và cho nó bằng 0
-                    lblHangSapHet.Text = "N/A";
-                }
+                // 4. Hàng sắp hết
+                // Logic: Count items with TONKHO < 10
+                string lowStockQuery = "SELECT COUNT(MAHH) FROM DM_HANGHOA WHERE ACTIVE = 1 AND TONKHO < 10";
+                object lowStockObj = DbHelper.Scalar(lowStockQuery);
+                lblHangSapHet.Text = Convert.ToInt32(lowStockObj).ToString();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi tải dữ liệu KPI Kho: " + ex.Message);
+                MessageBox.Show("Lỗi tải KPI: " + ex.Message);
             }
         }
 
@@ -83,10 +98,16 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 chartNhomHang.Series["Series1"].Label = "#PERCENT{P0}";
                 chartNhomHang.Series["Series1"].LegendText = "#VALX";
                 chartNhomHang.DataBind();
+
+                // Theme Chart
+                chartNhomHang.BackColor = ThemeManager.SecondaryColor;
+                chartNhomHang.ChartAreas[0].BackColor = ThemeManager.SecondaryColor;
+                chartNhomHang.Legends[0].BackColor = ThemeManager.SecondaryColor;
+                chartNhomHang.Legends[0].ForeColor = ThemeManager.TextColor;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi tải biểu đồ Nhóm hàng: " + ex.Message);
+                MessageBox.Show("Lỗi tải biểu đồ: " + ex.Message);
             }
         }
 
@@ -97,30 +118,50 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 // Top 5 theo số lượng
                 string topQtyQuery = @"
                     SELECT TOP 5 
-                        h.TENHH, 
-                        SUM(t.SO_LUONG_TON) as TongTon
+                        h.TENHH AS [Tên Hàng], 
+                        SUM(t.SO_LUONG_TON) as [Tồn Kho]
                     FROM KHO_CHITIET_TONKHO t
                     JOIN DM_HANGHOA h ON t.MAHH = h.MAHH
                     WHERE t.SO_LUONG_TON > 0
                     GROUP BY h.TENHH
-                    ORDER BY TongTon DESC";
-                dgvTopSoLuong.DataSource = DbHelper.Query(topQtyQuery);
+                    ORDER BY [Tồn Kho] DESC";
+                DataTable dtQty = DbHelper.Query(topQtyQuery);
+                dgvTopSoLuong.DataSource = dtQty;
+                FormatGrid(dgvTopSoLuong);
 
                 // Top 5 theo giá trị
                 string topValueQuery = @"
                     SELECT TOP 5 
-                        h.TENHH, 
-                        SUM(t.SO_LUONG_TON * t.DON_GIA_NHAP) as GiaTriTon
+                        h.TENHH AS [Tên Hàng], 
+                        SUM(t.SO_LUONG_TON * t.DON_GIA_NHAP) as [Giá Trị]
                     FROM KHO_CHITIET_TONKHO t
                     JOIN DM_HANGHOA h ON t.MAHH = h.MAHH
                     WHERE t.SO_LUONG_TON > 0
                     GROUP BY h.TENHH
-                    ORDER BY GiaTriTon DESC";
-                dgvTopGiaTri.DataSource = DbHelper.Query(topValueQuery);
+                    ORDER BY [Giá Trị] DESC";
+                DataTable dtVal = DbHelper.Query(topValueQuery);
+                dgvTopGiaTri.DataSource = dtVal;
+                FormatGrid(dgvTopGiaTri);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi tải top sản phẩm tồn kho: " + ex.Message);
+                MessageBox.Show("Lỗi tải Top sản phẩm: " + ex.Message);
+            }
+        }
+
+        private void FormatGrid(DataGridView dgv)
+        {
+            dgv.BackgroundColor = Color.White;
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = ThemeManager.PrimaryColor;
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            if (dgv.Columns.Count > 1)
+            {
+                dgv.Columns[1].DefaultCellStyle.Format = "N0";
+                dgv.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
         }
     }

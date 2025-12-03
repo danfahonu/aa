@@ -38,6 +38,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.btnXoa = new System.Windows.Forms.Button();
             this.btnSua = new System.Windows.Forms.Button();
             this.btnThem = new System.Windows.Forms.Button();
+            this.btnChonYeuCau = new System.Windows.Forms.Button();
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.gbDanhSach = new System.Windows.Forms.GroupBox();
             this.dgvDanhSach = new System.Windows.Forms.DataGridView();
@@ -53,16 +54,21 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.label2 = new System.Windows.Forms.Label();
             this.txtSoPhieu = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+
+            // 1. BeginInit for DataGridViews
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDanhSach)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvChiTiet)).BeginInit();
+
+            // 2. SuspendLayout for Containers
             this.pnlHeader.SuspendLayout();
             this.pnlActions.SuspendLayout();
             this.tlpMain.SuspendLayout();
             this.gbDanhSach.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDanhSach)).BeginInit();
             this.pnlRight.SuspendLayout();
             this.gbChiTiet.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvChiTiet)).BeginInit();
             this.gbThongTin.SuspendLayout();
             this.SuspendLayout();
+
             // 
             // pnlHeader
             // 
@@ -95,6 +101,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.pnlActions.Controls.Add(this.btnXoa);
             this.pnlActions.Controls.Add(this.btnSua);
             this.pnlActions.Controls.Add(this.btnThem);
+            this.pnlActions.Controls.Add(this.btnChonYeuCau);
             this.pnlActions.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlActions.Location = new System.Drawing.Point(0, 611);
             this.pnlActions.Name = "pnlActions";
@@ -103,66 +110,64 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             // 
             // btnHuy
             // 
-            this.btnHuy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnHuy.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.btnHuy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnHuy.ForeColor = System.Drawing.Color.Black;
-            this.btnHuy.Location = new System.Drawing.Point(1172, 10);
+            this.btnHuy.Location = new System.Drawing.Point(418, 10);
             this.btnHuy.Name = "btnHuy";
-            this.btnHuy.Size = new System.Drawing.Size(100, 30);
-            this.btnHuy.TabIndex = 4;
+            this.btnHuy.Size = new System.Drawing.Size(75, 30);
+            this.btnHuy.TabIndex = 5;
             this.btnHuy.Text = "Hủy";
-            this.btnHuy.UseVisualStyleBackColor = false;
+            this.btnHuy.UseVisualStyleBackColor = true;
+            this.btnHuy.Click += new System.EventHandler(this.BtnHuy_Click);
             // 
             // btnLuu
             // 
-            this.btnLuu.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLuu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(157)))), ((int)(((byte)(170)))), ((int)(((byte)(242)))));
-            this.btnLuu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLuu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(34)))), ((int)(((byte)(56)))));
-            this.btnLuu.Location = new System.Drawing.Point(1066, 10);
+            this.btnLuu.Location = new System.Drawing.Point(337, 10);
             this.btnLuu.Name = "btnLuu";
-            this.btnLuu.Size = new System.Drawing.Size(100, 30);
-            this.btnLuu.TabIndex = 3;
+            this.btnLuu.Size = new System.Drawing.Size(75, 30);
+            this.btnLuu.TabIndex = 4;
             this.btnLuu.Text = "Lưu";
-            this.btnLuu.UseVisualStyleBackColor = false;
+            this.btnLuu.UseVisualStyleBackColor = true;
+            this.btnLuu.Click += new System.EventHandler(this.BtnLuu_Click);
             // 
             // btnXoa
             // 
-            this.btnXoa.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnXoa.ForeColor = System.Drawing.Color.Gainsboro;
-            this.btnXoa.Location = new System.Drawing.Point(224, 10);
+            this.btnXoa.Location = new System.Drawing.Point(256, 10);
             this.btnXoa.Name = "btnXoa";
-            this.btnXoa.Size = new System.Drawing.Size(100, 30);
-            this.btnXoa.TabIndex = 2;
+            this.btnXoa.Size = new System.Drawing.Size(75, 30);
+            this.btnXoa.TabIndex = 3;
             this.btnXoa.Text = "Xóa";
             this.btnXoa.UseVisualStyleBackColor = true;
             // 
             // btnSua
             // 
-            this.btnSua.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSua.ForeColor = System.Drawing.Color.Gainsboro;
-            this.btnSua.Location = new System.Drawing.Point(118, 10);
+            this.btnSua.Location = new System.Drawing.Point(175, 10);
             this.btnSua.Name = "btnSua";
-            this.btnSua.Size = new System.Drawing.Size(100, 30);
-            this.btnSua.TabIndex = 1;
+            this.btnSua.Size = new System.Drawing.Size(75, 30);
+            this.btnSua.TabIndex = 2;
             this.btnSua.Text = "Sửa";
             this.btnSua.UseVisualStyleBackColor = true;
             // 
             // btnThem
             // 
-            this.btnThem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnThem.ForeColor = System.Drawing.Color.Gainsboro;
-            this.btnThem.Location = new System.Drawing.Point(12, 10);
+            this.btnThem.Location = new System.Drawing.Point(94, 10);
             this.btnThem.Name = "btnThem";
-            this.btnThem.Size = new System.Drawing.Size(100, 30);
-            this.btnThem.TabIndex = 0;
+            this.btnThem.Size = new System.Drawing.Size(75, 30);
+            this.btnThem.TabIndex = 1;
             this.btnThem.Text = "Thêm";
             this.btnThem.UseVisualStyleBackColor = true;
+            this.btnThem.Click += new System.EventHandler(this.BtnThem_Click);
+            // 
+            // btnChonYeuCau
+            // 
+            this.btnChonYeuCau.Location = new System.Drawing.Point(13, 10);
+            this.btnChonYeuCau.Name = "btnChonYeuCau";
+            this.btnChonYeuCau.Size = new System.Drawing.Size(75, 30);
+            this.btnChonYeuCau.TabIndex = 0;
+            this.btnChonYeuCau.Text = "Chọn YC";
+            this.btnChonYeuCau.UseVisualStyleBackColor = true;
+            this.btnChonYeuCau.Click += new System.EventHandler(this.BtnChonYeuCau_Click);
             // 
             // tlpMain
             // 
-            this.tlpMain.ColumnCount = 2;
             this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
             this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65F));
             this.tlpMain.Controls.Add(this.gbDanhSach, 0, 0);
@@ -172,7 +177,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.tlpMain.Name = "tlpMain";
             this.tlpMain.RowCount = 1;
             this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpMain.Size = new System.Drawing.Size(1284, 561);
+            this.tlpMain.Size = new System.Drawing.Size(1284, 561); // Adjusted size to fit
             this.tlpMain.TabIndex = 3;
             // 
             // gbDanhSach
@@ -341,19 +346,20 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.Name = "FormPhieuNhap";
             this.Text = "Phiếu Nhập Kho";
             this.Load += new System.EventHandler(this.FormPhieuNhap_Load);
+
+            // 3. ResumeLayout and EndInit
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();
             this.pnlActions.ResumeLayout(false);
             this.tlpMain.ResumeLayout(false);
             this.gbDanhSach.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDanhSach)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDanhSach)).EndInit();
             this.pnlRight.ResumeLayout(false);
             this.gbChiTiet.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvChiTiet)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvChiTiet)).EndInit();
             this.gbThongTin.ResumeLayout(false);
             this.gbThongTin.PerformLayout();
             this.ResumeLayout(false);
-
         }
 
         #endregion
@@ -366,6 +372,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         private System.Windows.Forms.Button btnXoa;
         private System.Windows.Forms.Button btnSua;
         private System.Windows.Forms.Button btnThem;
+        private System.Windows.Forms.Button btnChonYeuCau;
         private System.Windows.Forms.TableLayoutPanel tlpMain;
         private System.Windows.Forms.GroupBox gbDanhSach;
         private System.Windows.Forms.DataGridView dgvDanhSach;

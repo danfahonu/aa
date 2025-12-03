@@ -11,6 +11,7 @@ namespace DoAnLapTrinhQuanLy
         private ToolStripMenuItem mDangNhapLai;
         private ToolStripMenuItem mDoiMatKhau;
         private ToolStripMenuItem mAttachDb;
+        private ToolStripMenuItem mTroLyAo;
         private ToolStripMenuItem mThoat;
         private ToolStripMenuItem mDanhMuc;
         private ToolStripMenuItem mKhachHang;
@@ -95,8 +96,14 @@ namespace DoAnLapTrinhQuanLy
             this.mHeThong.Text = "Hệ thống";
             this.mHeThong.DropDownItems.AddRange(new ToolStripItem[] {
                 this.mDangNhapLai, this.mDoiMatKhau, new ToolStripSeparator(),
-                this.mAttachDb, new ToolStripSeparator(), this.mThoat
+                this.mDangNhapLai, this.mDoiMatKhau, new ToolStripSeparator(),
+                this.mAttachDb, new ToolStripSeparator(), this.mTroLyAo, new ToolStripSeparator(), this.mThoat
             });
+            // 
+            // mTroLyAo
+            // 
+            this.mTroLyAo.Text = "Trợ lý ảo AI";
+            this.mTroLyAo.Click += new System.EventHandler(this.mTroLyAo_Click);
             // 
             // mDangNhapLai
             // 
