@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace DoAnLapTrinhQuanLy.CustomControls
+namespace DoAnLapTrinhQuanLy.Controls
 {
     public class ModernPanel : Panel
     {

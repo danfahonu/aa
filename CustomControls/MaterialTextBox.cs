@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace DoAnLapTrinhQuanLy.CustomControls
+namespace DoAnLapTrinhQuanLy.Controls
 {
     [DefaultEvent("OnTextChanged")]
     public class MaterialTextBox : UserControl

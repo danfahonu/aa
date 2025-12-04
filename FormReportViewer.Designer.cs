@@ -1,4 +1,4 @@
-using DoAnLapTrinhQuanLy.CustomControls;
+using DoAnLapTrinhQuanLy.Controls;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
@@ -31,10 +31,10 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlSidebar = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
-            this.btnXuatExcel = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnXemBaoCao = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.txtFilter = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.pnlSidebar = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
+            this.btnXuatExcel = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnXemBaoCao = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.txtFilter = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.lblFilter = new System.Windows.Forms.Label();
             this.dtpDenNgay = new System.Windows.Forms.DateTimePicker();
             this.lblToDate = new System.Windows.Forms.Label();
@@ -43,7 +43,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.cboLoaiBaoCao = new System.Windows.Forms.ComboBox();
             this.lblReportType = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.pnlContent = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlContent = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.lblStatus = new System.Windows.Forms.Label();
             this.dgvBaoCao = new System.Windows.Forms.DataGridView();
             this.tableLayoutPanel1.SuspendLayout();

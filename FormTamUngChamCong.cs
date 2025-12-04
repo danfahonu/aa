@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Transactions;
 using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {

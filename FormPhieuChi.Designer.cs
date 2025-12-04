@@ -17,28 +17,28 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void InitializeComponent()
         {
-            this.pnlHeader = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlHeader = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.pnlActions = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
-            this.btnGhiSo = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnHuy = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnLuu = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnThem = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
+            this.pnlActions = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
+            this.btnGhiSo = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnHuy = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnLuu = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnThem = new DoAnLapTrinhQuanLy.Controls.ModernButton();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.txtSoPhieu = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtSoPhieu = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.cboNhaCungCap = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.dtpNgayLap = new System.Windows.Forms.DateTimePicker();
             this.label4 = new System.Windows.Forms.Label();
-            this.txtSoTien = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtSoTien = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.cboTaiKhoan = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.txtLyDo = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
-            this.btnXoa = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnSua = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
+            this.txtLyDo = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
+            this.btnXoa = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnSua = new DoAnLapTrinhQuanLy.Controls.ModernButton();
             this.pnlHeader.SuspendLayout();
             this.pnlActions.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -413,27 +413,27 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #endregion
 
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlHeader;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlHeader;
         private System.Windows.Forms.Label lblTitle;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlActions;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnThem;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnLuu;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnHuy;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnGhiSo;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlActions;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnThem;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnLuu;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnHuy;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnGhiSo;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label1;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtSoPhieu;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtSoPhieu;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox cboNhaCungCap;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DateTimePicker dtpNgayLap;
         private System.Windows.Forms.Label label6;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtLyDo;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtLyDo;
         private System.Windows.Forms.Label label4;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtSoTien;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtSoTien;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox cboTaiKhoan;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnXoa;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnSua;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnXoa;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnSua;
     }
 }

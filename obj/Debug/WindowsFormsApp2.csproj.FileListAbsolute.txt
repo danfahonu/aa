@@ -399,11 +399,6 @@ D:\aa\bin\Debug\ru\Microsoft.ReportViewer.WinForms.resources.dll
 D:\aa\bin\Debug\zh-CHS\Microsoft.ReportViewer.WinForms.resources.dll
 D:\aa\bin\Debug\zh-CHT\Microsoft.ReportViewer.WinForms.resources.dll
 D:\aa\obj\Debug\WindowsFormsApp2.csproj.AssemblyReference.cache
-D:\aa\obj\Debug\StoreGearVN.exe.config
-D:\aa\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormAttach.resources
-D:\aa\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDangNhap.resources
-D:\aa\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDanhMucHangHoa.resources
-D:\aa\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDashboard.resources
 D:\aa\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormDoiMatKhau.resources
 D:\aa\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormHeThongTaiKhoanKeToan.resources
 D:\aa\obj\Debug\DoAnLapTrinhQuanLy.GuiLayer.FormInPhieu.resources

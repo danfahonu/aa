@@ -19,27 +19,27 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlHeader = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
-            this.lblTitle = new System.Windows.Forms.Label();
-            this.pnlMaster = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlHeader = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
+            this.lblTitleHeader = new System.Windows.Forms.Label();
+            this.pnlMaster = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.tlpMaster = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.txtSoPhieu = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtSoPhieu = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.dtpNgayLap = new System.Windows.Forms.DateTimePicker();
             this.label3 = new System.Windows.Forms.Label();
             this.cboNhaCungCap = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.txtGhiChu = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
-            this.pnlGrid = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.txtGhiChu = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
+            this.pnlGrid = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.dgvChiTiet = new System.Windows.Forms.DataGridView();
-            this.pnlFooter = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlFooter = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.lblTongTien = new System.Windows.Forms.Label();
             this.lblTongCong = new System.Windows.Forms.Label();
-            this.btnHuy = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnLuu = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnThem = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnChonYeuCau = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
+            this.btnHuy = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnLuu = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnThem = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnChonYeuCau = new DoAnLapTrinhQuanLy.Controls.ModernButton();
             this.tlpMain.SuspendLayout();
             this.pnlHeader.SuspendLayout();
             this.pnlMaster.SuspendLayout();
@@ -72,7 +72,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             // 
             this.pnlHeader.BackColor = System.Drawing.Color.White;
             this.pnlHeader.BorderRadius = 0;
-            this.pnlHeader.Controls.Add(this.lblTitle);
+            this.pnlHeader.Controls.Add(this.lblTitleHeader);
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlHeader.GradientAngle = 90F;
             this.pnlHeader.GradientBottomColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
@@ -82,17 +82,17 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.pnlHeader.Size = new System.Drawing.Size(1002, 54);
             this.pnlHeader.TabIndex = 0;
             // 
-            // lblTitle
+            // lblTitleHeader
             // 
-            this.lblTitle.AutoSize = true;
-            this.lblTitle.BackColor = System.Drawing.Color.Transparent;
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTitle.ForeColor = System.Drawing.Color.White;
-            this.lblTitle.Location = new System.Drawing.Point(20, 10);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(223, 32);
-            this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "PHIẾU NHẬP KHO";
+            this.lblTitleHeader.AutoSize = true;
+            this.lblTitleHeader.BackColor = System.Drawing.Color.Transparent;
+            this.lblTitleHeader.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTitleHeader.ForeColor = System.Drawing.Color.White;
+            this.lblTitleHeader.Location = new System.Drawing.Point(20, 10);
+            this.lblTitleHeader.Name = "lblTitleHeader";
+            this.lblTitleHeader.Size = new System.Drawing.Size(223, 32);
+            this.lblTitleHeader.TabIndex = 0;
+            this.lblTitleHeader.Text = "PHIẾU NHẬP KHO";
             // 
             // pnlMaster
             // 
@@ -403,25 +403,25 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tlpMain;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlHeader;
-        private System.Windows.Forms.Label lblTitle;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlMaster;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlHeader;
+        private System.Windows.Forms.Label lblTitleHeader;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlMaster;
         private System.Windows.Forms.TableLayoutPanel tlpMaster;
         private System.Windows.Forms.Label label1;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtSoPhieu;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtSoPhieu;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DateTimePicker dtpNgayLap;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox cboNhaCungCap;
         private System.Windows.Forms.Label label4;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtGhiChu;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlGrid;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtGhiChu;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlGrid;
         private System.Windows.Forms.DataGridView dgvChiTiet;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlFooter;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnChonYeuCau;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnThem;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnLuu;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnHuy;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlFooter;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnChonYeuCau;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnThem;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnLuu;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnHuy;
         private System.Windows.Forms.Label lblTongCong;
         private System.Windows.Forms.Label lblTongTien;
     }

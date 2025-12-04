@@ -1,4 +1,5 @@
 using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Core;
 using System;
 using System.Data;
 using System.Drawing;

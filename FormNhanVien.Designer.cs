@@ -17,33 +17,33 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void InitializeComponent()
         {
-            this.pnlHeader = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlHeader = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.pnlActions = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
-            this.btnHuy = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnLuu = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnXoa = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnSua = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnThem = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
+            this.pnlActions = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
+            this.btnHuy = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnLuu = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnXoa = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnSua = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnThem = new DoAnLapTrinhQuanLy.Controls.ModernButton();
             this.dgvNhanVien = new System.Windows.Forms.DataGridView();
-            this.pnlInput = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlInput = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.txtMaNV = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtMaNV = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.txtHoTen = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtHoTen = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.txtDiaChi = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtDiaChi = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.cboChucVu = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.txtSDT = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtSDT = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.txtEmail = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtEmail = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.chkHoatDong = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.picHinhAnh = new System.Windows.Forms.PictureBox();
-            this.btnBrowse = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
+            this.btnBrowse = new DoAnLapTrinhQuanLy.Controls.ModernButton();
             this.pnlHeader.SuspendLayout();
             this.pnlActions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvNhanVien)).BeginInit();
@@ -522,32 +522,32 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #endregion
 
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlHeader;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlHeader;
         private System.Windows.Forms.Label lblTitle;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlActions;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnThem;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnSua;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnXoa;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnLuu;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnHuy;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlActions;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnThem;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnSua;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnXoa;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnLuu;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnHuy;
         private System.Windows.Forms.DataGridView dgvNhanVien;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlInput;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlInput;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label1;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtMaNV;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtMaNV;
         private System.Windows.Forms.Label label3;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtSDT;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtSDT;
         private System.Windows.Forms.Label label2;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtHoTen;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtHoTen;
         private System.Windows.Forms.Label label4;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtEmail;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtEmail;
         private System.Windows.Forms.Label label6;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtDiaChi;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtDiaChi;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox cboChucVu;
         private System.Windows.Forms.CheckBox chkHoatDong;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.PictureBox picHinhAnh;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnBrowse;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnBrowse;
     }
 }

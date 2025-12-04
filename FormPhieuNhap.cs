@@ -13,7 +13,7 @@ using DoAnLapTrinhQuanLy.Data;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormPhieuNhap : Form
+    public partial class FormPhieuNhap : BaseForm
     {
         private string _mode = "";
         private long _idYeuCau = 0;
@@ -24,9 +24,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             try
             {
                 InitializeComponent();
-                // 1. Double Buffering
-                this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
-                this.UpdateStyles();
+                // Double Buffering is handled by BaseForm
 
                 if (dgvChiTiet == null) throw new Exception("dgvChiTiet is null after InitializeComponent");
 
@@ -51,16 +49,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        // Optimization: Reduce flicker
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x02000000;  // WS_EX_COMPOSITED
-                return cp;
-            }
-        }
+        // CreateParams is handled by BaseForm
 
         private void DtChiTiet_ColumnChanged(object sender, DataColumnChangeEventArgs e)
         {
@@ -75,7 +64,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         {
             try
             {
-                ThemeManager.Apply(this);
+                // ThemeManager.Apply(this); // Handled by BaseForm
                 this.SuspendLayout();
                 this.Cursor = Cursors.WaitCursor;
 

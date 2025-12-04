@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormCaiDatHeThong : Form
+    public partial class FormCaiDatHeThong : System.Windows.Forms.Form
     {
         private enum FormMode { View, Edit, New }
 

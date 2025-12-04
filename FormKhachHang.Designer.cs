@@ -17,29 +17,29 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void InitializeComponent()
         {
-            this.pnlHeader = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlHeader = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.pnlActions = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
-            this.btnHuy = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnLuu = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnXoa = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnSua = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnThem = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
+            this.pnlActions = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
+            this.btnHuy = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnLuu = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnXoa = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnSua = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnThem = new DoAnLapTrinhQuanLy.Controls.ModernButton();
             this.dgvKhachHang = new System.Windows.Forms.DataGridView();
-            this.pnlInput = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlInput = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.txtMaKH = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtMaKH = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.txtSDT = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtSDT = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.txtTenKH = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtTenKH = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.txtEmail = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtEmail = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.txtDiaChi = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtDiaChi = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.txtGhiChu = new DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox();
+            this.txtGhiChu = new DoAnLapTrinhQuanLy.Controls.MaterialTextBox();
             this.pnlHeader.SuspendLayout();
             this.pnlActions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvKhachHang)).BeginInit();
@@ -277,7 +277,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.txtMaKH.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtMaKH.ForeColor = System.Drawing.Color.DimGray;
             this.txtMaKH.Location = new System.Drawing.Point(208, 21);
-            this.txtMaKH.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtMaKH.Margin = new System.Windows.Forms.Padding(6);
             this.txtMaKH.Multiline = false;
             this.txtMaKH.Name = "txtMaKH";
             this.txtMaKH.Padding = new System.Windows.Forms.Padding(10, 11, 10, 11);
@@ -313,7 +313,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.txtSDT.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtSDT.ForeColor = System.Drawing.Color.DimGray;
             this.txtSDT.Location = new System.Drawing.Point(849, 21);
-            this.txtSDT.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtSDT.Margin = new System.Windows.Forms.Padding(6);
             this.txtSDT.Multiline = false;
             this.txtSDT.Name = "txtSDT";
             this.txtSDT.Padding = new System.Windows.Forms.Padding(10, 11, 10, 11);
@@ -349,7 +349,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.txtTenKH.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtTenKH.ForeColor = System.Drawing.Color.DimGray;
             this.txtTenKH.Location = new System.Drawing.Point(208, 69);
-            this.txtTenKH.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtTenKH.Margin = new System.Windows.Forms.Padding(6);
             this.txtTenKH.Multiline = false;
             this.txtTenKH.Name = "txtTenKH";
             this.txtTenKH.Padding = new System.Windows.Forms.Padding(10, 11, 10, 11);
@@ -385,7 +385,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.txtEmail.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtEmail.ForeColor = System.Drawing.Color.DimGray;
             this.txtEmail.Location = new System.Drawing.Point(849, 69);
-            this.txtEmail.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtEmail.Margin = new System.Windows.Forms.Padding(6);
             this.txtEmail.Multiline = false;
             this.txtEmail.Name = "txtEmail";
             this.txtEmail.Padding = new System.Windows.Forms.Padding(10, 11, 10, 11);
@@ -421,7 +421,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.txtDiaChi.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDiaChi.ForeColor = System.Drawing.Color.DimGray;
             this.txtDiaChi.Location = new System.Drawing.Point(208, 117);
-            this.txtDiaChi.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtDiaChi.Margin = new System.Windows.Forms.Padding(6);
             this.txtDiaChi.Multiline = false;
             this.txtDiaChi.Name = "txtDiaChi";
             this.txtDiaChi.Padding = new System.Windows.Forms.Padding(10, 11, 10, 11);
@@ -457,7 +457,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             this.txtGhiChu.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtGhiChu.ForeColor = System.Drawing.Color.DimGray;
             this.txtGhiChu.Location = new System.Drawing.Point(849, 117);
-            this.txtGhiChu.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtGhiChu.Margin = new System.Windows.Forms.Padding(6);
             this.txtGhiChu.Multiline = false;
             this.txtGhiChu.Name = "txtGhiChu";
             this.txtGhiChu.Padding = new System.Windows.Forms.Padding(10, 11, 10, 11);
@@ -498,28 +498,28 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #endregion
 
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlHeader;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlHeader;
         private System.Windows.Forms.Label lblTitle;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlActions;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnThem;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnSua;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnXoa;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnLuu;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnHuy;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlActions;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnThem;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnSua;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnXoa;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnLuu;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnHuy;
         private System.Windows.Forms.DataGridView dgvKhachHang;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlInput;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlInput;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label1;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtMaKH;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtMaKH;
         private System.Windows.Forms.Label label3;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtSDT;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtSDT;
         private System.Windows.Forms.Label label2;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtTenKH;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtTenKH;
         private System.Windows.Forms.Label label4;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtEmail;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtEmail;
         private System.Windows.Forms.Label label6;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtDiaChi;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtDiaChi;
         private System.Windows.Forms.Label label5;
-        private DoAnLapTrinhQuanLy.CustomControls.MaterialTextBox txtGhiChu;
+        private DoAnLapTrinhQuanLy.Controls.MaterialTextBox txtGhiChu;
     }
 }

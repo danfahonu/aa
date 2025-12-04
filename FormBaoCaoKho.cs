@@ -1,3 +1,4 @@
+using DoAnLapTrinhQuanLy.Core;
 using DoAnLapTrinhQuanLy.Data;
 using System;
 using System.Collections.Generic;

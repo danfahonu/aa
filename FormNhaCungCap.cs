@@ -2,7 +2,8 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using DoAnLapTrinhQuanLy.Data; // Đảm bảo using này đúng
+using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Core; // Đảm bảo using này đúng
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {

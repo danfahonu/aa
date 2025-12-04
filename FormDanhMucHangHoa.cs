@@ -5,29 +5,199 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Controls;
+using ThemeManager = global::DoAnLapTrinhQuanLy.Core.ThemeManager;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormDanhMucHangHoa : Form
+    public partial class FormDanhMucHangHoa : BaseForm
     {
         private bool isAdding = false;
         private string currentImagePath = null;
 
+        // UI Controls
+        private Panel pnlFilter; // Top
+        private ModernDataGrid dgvMerchandise; // Center
+        private Panel pnlInput; // Right
+        private Panel pnlActionButtons; // Bottom of Input
+
+        // Filter Controls
+        private MaterialTextBox txtSearch;
+        private ModernButton btnAddNew;
+
+        // Input Controls
+        private MaterialTextBox txtMerchandiseCode;
+        private MaterialTextBox txtMerchandiseName;
+        private ComboBox cboCategory;
+        private MaterialTextBox txtUnit;
+        private MaterialTextBox txtCostPrice;
+        private MaterialTextBox txtSellingPrice;
+        private CheckBox chkIsActive;
+        private PictureBox picProductImage;
+        private ModernButton btnBrowseImage;
+
+        // Action Buttons
+        private ModernButton btnSave;
+        private ModernButton btnCancel;
+        private ModernButton btnEdit;
+        private ModernButton btnDelete;
+
         public FormDanhMucHangHoa()
         {
             InitializeComponent();
-            // 1. Enable Double Buffering
-            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
-            this.UpdateStyles();
+            InitializeCustomUI();
+        }
+
+        private void InitializeCustomUI()
+        {
+            this.Size = new Size(1200, 700);
+            this.Text = "DANH MỤC HÀNG HÓA";
+
+            // 1. Filter Panel (Top)
+            pnlFilter = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 60,
+                BackColor = ThemeManager.SecondaryColor,
+                Padding = new Padding(10)
+            };
+            InitializeFilterPanel();
+            this.Controls.Add(pnlFilter);
+
+            // 2. Input Panel (Right)
+            pnlInput = new Panel
+            {
+                Dock = DockStyle.Right,
+                Width = 350,
+                BackColor = ThemeManager.SecondaryColor,
+                Padding = new Padding(10)
+            };
+            InitializeInputPanel();
+            this.Controls.Add(pnlInput);
+
+            // 3. Grid (Fill)
+            dgvMerchandise = new ModernDataGrid();
+            dgvMerchandise.Dock = DockStyle.Fill;
+            dgvMerchandise.SelectionChanged += DgvMerchandise_SelectionChanged;
+            this.Controls.Add(dgvMerchandise);
+
+            // Bring Filter to front to ensure it stays on top if needed, though Dock order handles it
+            pnlFilter.BringToFront();
+        }
+
+        private void InitializeFilterPanel()
+        {
+            txtSearch = new MaterialTextBox
+            {
+                PlaceholderText = "🔍 Tìm kiếm hàng hóa...",
+                Size = new Size(300, 40),
+                Location = new Point(10, 10)
+            };
+            txtSearch.TextChanged += (s, e) => { /* Implement Search Logic */ };
+
+            btnAddNew = new ModernButton
+            {
+                Text = "+ Thêm Mới",
+                Size = new Size(120, 40),
+                Location = new Point(330, 10),
+                BackColor = ThemeManager.SuccessColor
+            };
+            btnAddNew.Click += BtnThem_Click;
+
+            pnlFilter.Controls.Add(btnAddNew);
+            pnlFilter.Controls.Add(txtSearch);
+        }
+
+        private void InitializeInputPanel()
+        {
+            int y = 10;
+            int labelW = 100;
+            int inputW = 220;
+            int gap = 50;
+
+            // Helper
+            void AddField(string label, Control input)
+            {
+                Label lbl = new Label { Text = label, Location = new Point(10, y + 8), AutoSize = true, ForeColor = ThemeManager.TextColor };
+                input.Location = new Point(labelW, y);
+                input.Width = inputW;
+                input.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+                pnlInput.Controls.Add(lbl);
+                pnlInput.Controls.Add(input);
+                y += gap;
+            }
+
+            Label lblTitle = new Label { Text = "THÔNG TIN CHI TIẾT", Font = new Font("Segoe UI", 12, FontStyle.Bold), ForeColor = ThemeManager.AccentColor, Location = new Point(10, y), AutoSize = true };
+            pnlInput.Controls.Add(lblTitle);
+            y += 40;
+
+            txtMerchandiseCode = new MaterialTextBox { PlaceholderText = "Mã hàng" };
+            AddField("Mã hàng:", txtMerchandiseCode);
+
+            txtMerchandiseName = new MaterialTextBox { PlaceholderText = "Tên hàng hóa" };
+            AddField("Tên hàng:", txtMerchandiseName);
+
+            cboCategory = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, BackColor = ThemeManager.TextBoxBackground, ForeColor = ThemeManager.TextColor, FlatStyle = FlatStyle.Flat };
+            AddField("Nhóm hàng:", cboCategory);
+
+            txtUnit = new MaterialTextBox { PlaceholderText = "Đơn vị tính" };
+            AddField("ĐVT:", txtUnit);
+
+            txtCostPrice = new MaterialTextBox { PlaceholderText = "0", ReadOnly = true };
+            AddField("Giá vốn:", txtCostPrice);
+
+            txtSellingPrice = new MaterialTextBox { PlaceholderText = "0" };
+            AddField("Giá bán:", txtSellingPrice);
+
+            chkIsActive = new CheckBox { Text = "Đang kinh doanh", Checked = true, AutoSize = true, ForeColor = ThemeManager.TextColor };
+            chkIsActive.Location = new Point(labelW, y);
+            pnlInput.Controls.Add(chkIsActive);
+            y += 40;
+
+            // Image
+            Label lblImg = new Label { Text = "Hình ảnh:", Location = new Point(10, y), AutoSize = true, ForeColor = ThemeManager.TextColor };
+            pnlInput.Controls.Add(lblImg);
+
+            picProductImage = new PictureBox { Location = new Point(labelW, y), Size = new Size(120, 120), BorderStyle = BorderStyle.FixedSingle, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.Black };
+            pnlInput.Controls.Add(picProductImage);
+
+            btnBrowseImage = new ModernButton { Text = "...", Location = new Point(labelW + 130, y + 85), Size = new Size(40, 35) };
+            btnBrowseImage.Click += BtnBrowse_Click;
+            pnlInput.Controls.Add(btnBrowseImage);
+            y += 130;
+
+            // Action Buttons Panel
+            pnlActionButtons = new Panel { Dock = DockStyle.Bottom, Height = 60, BackColor = Color.Transparent };
+
+            btnSave = new ModernButton { Text = "Lưu", Size = new Size(80, 40), BackColor = ThemeManager.AccentColor, Enabled = false };
+            btnSave.Click += BtnLuu_Click;
+
+            btnCancel = new ModernButton { Text = "Hủy", Size = new Size(80, 40), BackColor = Color.Gray, Enabled = false };
+            btnCancel.Click += BtnHuy_Click;
+
+            btnEdit = new ModernButton { Text = "Sửa", Size = new Size(80, 40), BackColor = ThemeManager.WarningColor };
+            btnEdit.Click += BtnSua_Click;
+
+            btnDelete = new ModernButton { Text = "Xóa", Size = new Size(80, 40), BackColor = ThemeManager.DangerColor };
+            btnDelete.Click += BtnXoa_Click;
+
+            // Layout buttons using FlowLayout
+            FlowLayoutPanel flow = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(5) };
+            flow.Controls.Add(btnCancel);
+            flow.Controls.Add(btnSave);
+            flow.Controls.Add(btnDelete);
+            flow.Controls.Add(btnEdit);
+
+            pnlActionButtons.Controls.Add(flow);
+            pnlInput.Controls.Add(pnlActionButtons);
         }
 
         private async void FormDanhMucHangHoa_Load(object sender, EventArgs e)
         {
-            // 2. Async Data Loading
             try
             {
                 ThemeManager.Apply(this);
-                this.SuspendLayout();
                 this.Cursor = Cursors.WaitCursor;
 
                 var dataTask = Task.Run(() => GetData());
@@ -35,11 +205,11 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
                 await Task.WhenAll(dataTask, nhomHangTask);
 
-                dgvHangHoa.DataSource = dataTask.Result;
+                dgvMerchandise.DataSource = dataTask.Result;
 
-                cboNhomHang.DataSource = nhomHangTask.Result;
-                cboNhomHang.DisplayMember = "TENNHOM";
-                cboNhomHang.ValueMember = "MANHOM";
+                cboCategory.DataSource = nhomHangTask.Result;
+                cboCategory.DisplayMember = "TENNHOM";
+                cboCategory.ValueMember = "MANHOM";
 
                 SetInputMode(false);
             }
@@ -49,7 +219,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
             finally
             {
-                this.ResumeLayout();
                 this.Cursor = Cursors.Default;
             }
         }
@@ -72,7 +241,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             {
                 this.Cursor = Cursors.WaitCursor;
                 DataTable dt = await Task.Run(() => GetData());
-                dgvHangHoa.DataSource = dt;
+                dgvMerchandise.DataSource = dt;
             }
             catch (Exception ex)
             {
@@ -84,79 +253,66 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        #region UX Mới: Quản lý trạng thái giao diện
-
         private void SetInputMode(bool enable)
         {
-            txtMaHH.ReadOnly = !isAdding; // Mã chỉ nhập khi thêm mới
-            txtTenHH.ReadOnly = !enable;
-            txtDVT.ReadOnly = !enable;
-            txtGiaBan.ReadOnly = !enable;
-            cboNhomHang.Enabled = enable;
-            chkActive.Enabled = enable;
-            btnBrowse.Enabled = enable;
+            txtMerchandiseCode.ReadOnly = !isAdding;
+            txtMerchandiseName.ReadOnly = !enable;
+            txtUnit.ReadOnly = !enable;
+            txtSellingPrice.ReadOnly = !enable;
+            cboCategory.Enabled = enable;
+            chkIsActive.Enabled = enable;
+            btnBrowseImage.Enabled = enable;
 
-            txtGiaVon.ReadOnly = true; // Giá vốn luôn read-only (tính tự động)
-            txtGiaVon.BackColor = Color.LightGray;
+            txtCostPrice.ReadOnly = true;
+            txtCostPrice.BackColor = enable ? ThemeManager.TextBoxBackground : Color.FromArgb(50, 50, 50);
 
-            btnLuu.Enabled = enable;
-            btnHuy.Enabled = enable;
-            btnThem.Enabled = !enable;
-            btnSua.Enabled = !enable;
-            btnXoa.Enabled = !enable;
-            btnIn.Enabled = !enable;
+            btnSave.Enabled = enable;
+            btnCancel.Enabled = enable;
+
+            // Logic: Can only Edit/Delete when NOT adding/editing
+            btnEdit.Enabled = !enable && dgvMerchandise.SelectedRows.Count > 0;
+            btnDelete.Enabled = !enable && dgvMerchandise.SelectedRows.Count > 0;
+            btnAddNew.Enabled = !enable;
         }
 
         private void ClearInputs()
         {
-            txtMaHH.Texts = "";
-            txtTenHH.Texts = "";
-            txtDVT.Texts = "";
-            txtGiaBan.Texts = "0";
-            txtGiaVon.Texts = "0";
-            cboNhomHang.SelectedIndex = -1;
-            chkActive.Checked = true;
-            picHinhAnh.Image = null;
+            txtMerchandiseCode.Texts = "";
+            txtMerchandiseName.Texts = "";
+            txtUnit.Texts = "";
+            txtSellingPrice.Texts = "0";
+            txtCostPrice.Texts = "0";
+            cboCategory.SelectedIndex = -1;
+            chkIsActive.Checked = true;
+            picProductImage.Image = null;
             currentImagePath = null;
         }
-
-        #endregion
-
-        #region Sự kiện của các nút
 
         private void BtnThem_Click(object sender, EventArgs e)
         {
             isAdding = true;
             ClearInputs();
             SetInputMode(true);
-            txtMaHH.Focus();
+            txtMerchandiseCode.Focus();
         }
 
         private void BtnSua_Click(object sender, EventArgs e)
         {
-            if (dgvHangHoa.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Vui lòng chọn một mặt hàng để sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (dgvMerchandise.SelectedRows.Count == 0) return;
             isAdding = false;
             SetInputMode(true);
-            txtTenHH.Focus();
+            txtMerchandiseName.Focus();
         }
 
         private void BtnXoa_Click(object sender, EventArgs e)
         {
-            if (dgvHangHoa.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Vui lòng chọn một mặt hàng để xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (dgvMerchandise.SelectedRows.Count == 0) return;
 
             if (MessageBox.Show("Bạn có chắc chắn muốn xóa mặt hàng này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 try
                 {
-                    string maHH = dgvHangHoa.SelectedRows[0].Cells["MAHH"].Value.ToString();
+                    string maHH = dgvMerchandise.SelectedRows[0].Cells["MAHH"].Value.ToString();
                     string query = "DELETE FROM DM_HANGHOA WHERE MAHH = @MaHH";
                     DbHelper.Execute(query, DbHelper.Param("@MaHH", maHH));
 
@@ -165,18 +321,18 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 }
                 catch (System.Data.SqlClient.SqlException sqlEx)
                 {
-                    if (sqlEx.Number == 547) // Foreign Key constraint violation
+                    if (sqlEx.Number == 547)
                     {
-                        MessageBox.Show("Dữ liệu này đang được sử dụng trong các phiếu nhập/xuất, không thể xóa!", "Lỗi ràng buộc dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Dữ liệu này đang được sử dụng, không thể xóa!", "Lỗi ràng buộc", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     else
                     {
-                        MessageBox.Show("Lỗi SQL khi xóa: " + sqlEx.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Lỗi SQL: " + sqlEx.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Lỗi khi xóa: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -185,7 +341,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(txtMaHH.Texts) || string.IsNullOrWhiteSpace(txtTenHH.Texts))
+                if (string.IsNullOrWhiteSpace(txtMerchandiseCode.Texts) || string.IsNullOrWhiteSpace(txtMerchandiseName.Texts))
                 {
                     MessageBox.Show("Mã và Tên hàng hóa không được để trống.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -193,12 +349,11 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
                 if (isAdding)
                 {
-                    // 3. Duplicate Check
-                    object count = DbHelper.Scalar("SELECT COUNT(*) FROM DM_HANGHOA WHERE MAHH = @MaHH", DbHelper.Param("@MaHH", txtMaHH.Texts));
+                    object count = DbHelper.Scalar("SELECT COUNT(*) FROM DM_HANGHOA WHERE MAHH = @MaHH", DbHelper.Param("@MaHH", txtMerchandiseCode.Texts));
                     if (Convert.ToInt32(count) > 0)
                     {
-                        MessageBox.Show("Mã hàng hóa này đã tồn tại! Vui lòng chọn mã khác.", "Trùng mã", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        txtMaHH.Focus();
+                        MessageBox.Show("Mã hàng hóa này đã tồn tại!", "Trùng mã", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        txtMerchandiseCode.Focus();
                         return;
                     }
 
@@ -206,13 +361,13 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                         INSERT INTO DM_HANGHOA (MAHH, TENHH, MANHOM, DVT, GIABAN, ANH, ACTIVE)
                         VALUES (@MaHH, @TenHH, @MaNhom, @DVT, @GiaBan, @Anh, @Active)";
                     DbHelper.Execute(query,
-                        DbHelper.Param("@MaHH", txtMaHH.Texts),
-                        DbHelper.Param("@TenHH", txtTenHH.Texts),
-                        DbHelper.Param("@MaNhom", cboNhomHang.SelectedValue),
-                        DbHelper.Param("@DVT", txtDVT.Texts),
-                        DbHelper.Param("@GiaBan", decimal.Parse(txtGiaBan.Texts)),
+                        DbHelper.Param("@MaHH", txtMerchandiseCode.Texts),
+                        DbHelper.Param("@TenHH", txtMerchandiseName.Texts),
+                        DbHelper.Param("@MaNhom", cboCategory.SelectedValue),
+                        DbHelper.Param("@DVT", txtUnit.Texts),
+                        DbHelper.Param("@GiaBan", decimal.Parse(txtSellingPrice.Texts)),
                         DbHelper.Param("@Anh", currentImagePath),
-                        DbHelper.Param("@Active", chkActive.Checked)
+                        DbHelper.Param("@Active", chkIsActive.Checked)
                     );
                 }
                 else
@@ -223,13 +378,13 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                             ANH = @Anh, ACTIVE = @Active
                         WHERE MAHH = @MaHH";
                     DbHelper.Execute(query,
-                        DbHelper.Param("@TenHH", txtTenHH.Texts),
-                        DbHelper.Param("@MaNhom", cboNhomHang.SelectedValue),
-                        DbHelper.Param("@DVT", txtDVT.Texts),
-                        DbHelper.Param("@GiaBan", decimal.Parse(txtGiaBan.Texts)),
+                        DbHelper.Param("@TenHH", txtMerchandiseName.Texts),
+                        DbHelper.Param("@MaNhom", cboCategory.SelectedValue),
+                        DbHelper.Param("@DVT", txtUnit.Texts),
+                        DbHelper.Param("@GiaBan", decimal.Parse(txtSellingPrice.Texts)),
                         DbHelper.Param("@Anh", currentImagePath),
-                        DbHelper.Param("@Active", chkActive.Checked),
-                        DbHelper.Param("@MaHH", txtMaHH.Texts)
+                        DbHelper.Param("@Active", chkIsActive.Checked),
+                        DbHelper.Param("@MaHH", txtMerchandiseCode.Texts)
                     );
                 }
                 MessageBox.Show("Lưu dữ liệu thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -245,13 +400,13 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void BtnHuy_Click(object sender, EventArgs e)
         {
-            if (!isAdding)
+            if (isAdding)
             {
-                DgvHangHoa_SelectionChanged(null, null);
+                ClearInputs();
             }
             else
             {
-                ClearInputs();
+                DgvMerchandise_SelectionChanged(null, null);
             }
             SetInputMode(false);
             isAdding = false;
@@ -264,36 +419,38 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             if (openFile.ShowDialog() == DialogResult.OK)
             {
                 currentImagePath = openFile.FileName;
-                picHinhAnh.Image = new Bitmap(currentImagePath);
+                picProductImage.Image = new Bitmap(currentImagePath);
             }
         }
 
-        private void DgvHangHoa_SelectionChanged(object sender, EventArgs e)
+        private void DgvMerchandise_SelectionChanged(object sender, EventArgs e)
         {
-            if (!isAdding && dgvHangHoa.SelectedRows.Count > 0)
+            if (!isAdding && dgvMerchandise.SelectedRows.Count > 0)
             {
-                var row = dgvHangHoa.SelectedRows[0];
-                txtMaHH.Texts = row.Cells["MAHH"].Value?.ToString();
-                txtTenHH.Texts = row.Cells["TENHH"].Value?.ToString();
-                txtDVT.Texts = row.Cells["DVT"].Value?.ToString();
-                txtGiaVon.Texts = row.Cells["GIAVON"].Value?.ToString();
-                txtGiaBan.Texts = row.Cells["GIABAN"].Value?.ToString();
-                cboNhomHang.SelectedValue = row.Cells["MANHOM"].Value;
+                var row = dgvMerchandise.SelectedRows[0];
+                txtMerchandiseCode.Texts = row.Cells["MAHH"].Value?.ToString();
+                txtMerchandiseName.Texts = row.Cells["TENHH"].Value?.ToString();
+                txtUnit.Texts = row.Cells["DVT"].Value?.ToString();
+                txtCostPrice.Texts = row.Cells["GIAVON"].Value?.ToString();
+                txtSellingPrice.Texts = row.Cells["GIABAN"].Value?.ToString();
+                cboCategory.SelectedValue = row.Cells["MANHOM"].Value;
 
-                chkActive.Checked = row.Cells["ACTIVE"].Value != null && (bool)row.Cells["ACTIVE"].Value;
+                chkIsActive.Checked = row.Cells["ACTIVE"].Value != null && (bool)row.Cells["ACTIVE"].Value;
 
                 currentImagePath = row.Cells["ANH"].Value?.ToString();
                 if (!string.IsNullOrEmpty(currentImagePath) && File.Exists(currentImagePath))
                 {
-                    picHinhAnh.Image = Image.FromFile(currentImagePath);
+                    picProductImage.Image = Image.FromFile(currentImagePath);
                 }
                 else
                 {
-                    picHinhAnh.Image = null;
+                    picProductImage.Image = null;
                 }
+
+                // Enable Edit/Delete when row selected
+                btnEdit.Enabled = true;
+                btnDelete.Enabled = true;
             }
         }
-
-        #endregion
     }
 }

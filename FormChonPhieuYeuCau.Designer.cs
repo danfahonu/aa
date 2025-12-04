@@ -17,13 +17,13 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         private void InitializeComponent()
         {
-            this.pnlHeader = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
+            this.pnlHeader = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
             this.lblTitle = new System.Windows.Forms.Label();
             this.pnlBody = new System.Windows.Forms.Panel();
             this.dgvDanhSach = new System.Windows.Forms.DataGridView();
-            this.pnlFooter = new DoAnLapTrinhQuanLy.CustomControls.ModernPanel();
-            this.btnHuy = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
-            this.btnChon = new DoAnLapTrinhQuanLy.CustomControls.ModernButton();
+            this.pnlFooter = new DoAnLapTrinhQuanLy.Controls.ModernPanel();
+            this.btnHuy = new DoAnLapTrinhQuanLy.Controls.ModernButton();
+            this.btnChon = new DoAnLapTrinhQuanLy.Controls.ModernButton();
             this.pnlHeader.SuspendLayout();
             this.pnlBody.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDanhSach)).BeginInit();
@@ -153,12 +153,12 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
         #endregion
 
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlHeader;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlHeader;
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Panel pnlBody;
         private System.Windows.Forms.DataGridView dgvDanhSach;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernPanel pnlFooter;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnHuy;
-        private DoAnLapTrinhQuanLy.CustomControls.ModernButton btnChon;
+        private DoAnLapTrinhQuanLy.Controls.ModernPanel pnlFooter;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnHuy;
+        private DoAnLapTrinhQuanLy.Controls.ModernButton btnChon;
     }
 }
