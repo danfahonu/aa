@@ -1,15 +1,15 @@
 using System;
 using System.Data;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
+using System.IO;
+using System.Data.SqlClient;
 using DoAnLapTrinhQuanLy.Data;
 using DoAnLapTrinhQuanLy.Core;
-using System.Data.SqlClient;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormNhanVien : Form
+    public partial class FormNhanVien : BaseForm
     {
         private bool isAdding = false;
         private string currentImagePath = null;
@@ -17,17 +17,15 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         public FormNhanVien()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormNhanVien_Load(object sender, EventArgs e)
         {
-            ThemeManager.Apply(this);
             LoadData();
             LoadComboBoxChucVu();
             SetInputMode(false);
         }
-
-        #region Xử lý dữ liệu
 
         private void LoadData()
         {
@@ -71,8 +69,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             picHinhAnh.Image = null;
             currentImagePath = null;
         }
-
-        #endregion
 
         #region Quản lý trạng thái giao diện (UX)
 

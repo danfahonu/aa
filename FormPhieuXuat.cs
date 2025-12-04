@@ -8,23 +8,25 @@ using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormPhieuXuat : Form
+    public partial class FormPhieuXuat : BaseForm
     {
-        private bool isAdding = false;
         private long currentSoPhieu = -1;
+        private bool isAdding = false;
 
         public FormPhieuXuat()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
+
+            // Initialization logic
+            LoadComboBoxKhachHang();
+            SetupDataGridViewComboBox();
+            ClearInputs();
         }
 
         private void FormPhieuXuat_Load(object sender, EventArgs e)
         {
-            ThemeManager.Apply(this);
-            LoadComboBoxKhachHang();
-            SetupDataGridViewComboBox();
             SetInputMode(false);
-            ClearInputs();
         }
 
         #region Xử lý dữ liệu và ComboBox
@@ -153,9 +155,9 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     if (isAdding)
                     {
                         string queryPhieu = @"
-                            INSERT INTO PHIEU (NGAYLAP, LOAI, MAKH, GHICHU, TRANGTHAI)
-                            OUTPUT INSERTED.SOPHIEU
-                            VALUES (@NgayLap, 'X', @MaKH, @GhiChu, 0)";
+                                    INSERT INTO PHIEU (NGAYLAP, LOAI, MAKH, GHICHU, TRANGTHAI)
+                                    OUTPUT INSERTED.SOPHIEU
+                                    VALUES (@NgayLap, 'X', @MaKH, @GhiChu, 0)";
                         object generatedId = DbHelper.Scalar(queryPhieu,
                             DbHelper.Param("@NgayLap", dtpNgayLap.Value),
                             DbHelper.Param("@MaKH", cboKhachHang.SelectedValue),
@@ -166,8 +168,8 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     else
                     {
                         string queryPhieu = @"
-                            UPDATE PHIEU SET NGAYLAP = @NgayLap, MAKH = @MaKH, GHICHU = @GhiChu
-                            WHERE SOPHIEU = @SoPhieu";
+                                    UPDATE PHIEU SET NGAYLAP = @NgayLap, MAKH = @MaKH, GHICHU = @GhiChu
+                                    WHERE SOPHIEU = @SoPhieu";
                         DbHelper.Execute(queryPhieu,
                              DbHelper.Param("@NgayLap", dtpNgayLap.Value),
                              DbHelper.Param("@MaKH", cboKhachHang.SelectedValue),
@@ -188,8 +190,8 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
                         // NO THANHTIEN in INSERT
                         string queryCT = @"
-                            INSERT INTO PHIEU_CT (SOPHIEU, MAHH, SL, DONGIA)
-                            VALUES (@SoPhieu, @MaHH, @SL, @DonGia)";
+                                    INSERT INTO PHIEU_CT (SOPHIEU, MAHH, SL, DONGIA)
+                                    VALUES (@SoPhieu, @MaHH, @SL, @DonGia)";
                         DbHelper.Execute(queryCT,
                             DbHelper.Param("@SoPhieu", currentSoPhieu),
                             DbHelper.Param("@MaHH", maHH),

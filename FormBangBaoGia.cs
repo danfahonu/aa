@@ -3,10 +3,11 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormBangBaoGia : Form
+    public partial class FormBangBaoGia : BaseForm
     {
         private bool isAdding = false;
         private long currentSoPhieu = -1; // -1 nghĩa là phiếu mới
@@ -14,6 +15,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         public FormBangBaoGia()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormBangBaoGia_Load(object sender, EventArgs e)

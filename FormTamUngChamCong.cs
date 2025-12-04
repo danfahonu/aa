@@ -8,16 +8,17 @@ using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormTamUngChamCong : Form
+    public partial class FormTamUngChamCong : BaseForm
     {
         public FormTamUngChamCong()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormTamUngChamCong_Load(object sender, EventArgs e)
         {
-            ThemeManager.Apply(this);
+            // ThemeManager.Apply(this);
             LoadComboBoxNhanVien();
             numThang.Value = DateTime.Now.Month;
             numNam.Value = DateTime.Now.Year;

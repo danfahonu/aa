@@ -3,17 +3,19 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormHeThongTaiKhoanKeToan : Form
+    public partial class FormHeThongTaiKhoanKeToan : BaseForm
     {
         private bool isAdding = false;
-        private string selectedTK = null; // Lưu lại tài khoản đang được chọn
+        private string selectedTK = null;
 
         public FormHeThongTaiKhoanKeToan()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormHeThongTaiKhoanKeToan_Load(object sender, EventArgs e)
@@ -21,8 +23,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             LoadTreeView();
             SetInputMode(false);
         }
-
-        #region Xử lý dữ liệu và TreeView
 
         private void LoadTreeView()
         {
@@ -76,8 +76,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             numCap.Value = 1;
             txtGhiChu.Text = "";
         }
-
-        #endregion
 
         #region Quản lý trạng thái giao diện (UX)
 

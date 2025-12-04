@@ -7,23 +7,21 @@ using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormKhachHang : Form
+    public partial class FormKhachHang : BaseForm
     {
         private bool isAdding = false;
 
         public FormKhachHang()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormKhachHang_Load(object sender, EventArgs e)
         {
-            ThemeManager.Apply(this);
             LoadData();
-            SetInputMode(false); // Khóa giao diện khi mới mở
+            SetInputMode(false);
         }
-
-        #region Xử lý dữ liệu
 
         private void LoadData()
         {
@@ -48,8 +46,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtEmail.Texts = "";
             txtGhiChu.Texts = "";
         }
-
-        #endregion
 
         #region Quản lý trạng thái giao diện (UX)
 
@@ -152,8 +148,8 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     }
 
                     string query = @"
-                        INSERT INTO DANHMUCKHACHHANG (MAKH, TENKH, DIACHI, SDT, EMAIL, GHICHU, NGAYTAO)
-                        VALUES (@MaKH, @TenKH, @DiaChi, @SDT, @Email, @GhiChu, @NgayTao)";
+                                INSERT INTO DANHMUCKHACHHANG (MAKH, TENKH, DIACHI, SDT, EMAIL, GHICHU, NGAYTAO)
+                                VALUES (@MaKH, @TenKH, @DiaChi, @SDT, @Email, @GhiChu, @NgayTao)";
                     DbHelper.Execute(query,
                         DbHelper.Param("@MaKH", txtMaKH.Texts),
                         DbHelper.Param("@TenKH", txtTenKH.Texts),
@@ -167,10 +163,10 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 else
                 {
                     string query = @"
-                        UPDATE DANHMUCKHACHHANG SET
-                            TENKH = @TenKH, DIACHI = @DiaChi, SDT = @SDT, 
-                            EMAIL = @Email, GHICHU = @GhiChu
-                        WHERE MAKH = @MaKH";
+                                UPDATE DANHMUCKHACHHANG SET
+                                    TENKH = @TenKH, DIACHI = @DiaChi, SDT = @SDT, 
+                                    EMAIL = @Email, GHICHU = @GhiChu
+                                WHERE MAKH = @MaKH";
                     DbHelper.Execute(query,
                         DbHelper.Param("@TenKH", txtTenKH.Texts),
                         DbHelper.Param("@DiaChi", txtDiaChi.Texts),

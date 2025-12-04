@@ -8,13 +8,14 @@ using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormBaoCaoQuy : Form
+    public partial class FormBaoCaoQuy : BaseForm
     {
         private Button btnPrint; // Declare the button
 
         public FormBaoCaoQuy()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
             InitializePrintButton(); // Initialize it programmatically
         }
 

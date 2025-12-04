@@ -7,7 +7,7 @@ using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormQuanLyHeThong : Form
+    public partial class FormQuanLyHeThong : BaseForm
     {
         private bool isAdding = false;
         private int selectedId = -1; // Dùng ID (khóa chính) để xác định người dùng đang chọn
@@ -15,13 +15,14 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         public FormQuanLyHeThong()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormQuanLyHeThong_Load(object sender, EventArgs e)
         {
             try
             {
-                ThemeManager.Apply(this);
+                // ThemeManager.Apply(this); // Handled by BaseForm
                 LoadDataNguoiDung();
                 LoadComboBoxQuyen();
                 LoadComboBoxNhanVien();

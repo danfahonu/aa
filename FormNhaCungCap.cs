@@ -3,27 +3,25 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using DoAnLapTrinhQuanLy.Data;
-using DoAnLapTrinhQuanLy.Core; // Đảm bảo using này đúng
+using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormNhaCungCap : Form
+    public partial class FormNhaCungCap : BaseForm
     {
         private bool isAdding = false;
 
         public FormNhaCungCap()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormNhaCungCap_Load(object sender, EventArgs e)
         {
-            ThemeManager.Apply(this);
             LoadData();
-            SetInputMode(false); // Khóa giao diện khi mới mở
+            SetInputMode(false);
         }
-
-        #region Xử lý dữ liệu
 
         private void LoadData()
         {
@@ -49,8 +47,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtMST.Texts = "";
             txtGhiChu.Texts = "";
         }
-
-        #endregion
 
         #region Quản lý trạng thái giao diện (UX)
 
@@ -154,8 +150,8 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     }
 
                     string query = @"
-                        INSERT INTO DM_NHACUNGCAP (MA_NCC, TEN_NCC, DIACHI_NCC, SDT, EMAIL, MSTHUE, GHICHU)
-                        VALUES (@MaNCC, @TenNCC, @DiaChi, @SDT, @Email, @MST, @GhiChu)";
+                                INSERT INTO DM_NHACUNGCAP (MA_NCC, TEN_NCC, DIACHI_NCC, SDT, EMAIL, MSTHUE, GHICHU)
+                                VALUES (@MaNCC, @TenNCC, @DiaChi, @SDT, @Email, @MST, @GhiChu)";
                     DbHelper.Execute(query,
                         DbHelper.Param("@MaNCC", txtMaNCC.Texts),
                         DbHelper.Param("@TenNCC", txtTenNCC.Texts),
@@ -169,10 +165,10 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 else
                 {
                     string query = @"
-                        UPDATE DM_NHACUNGCAP SET
-                            TEN_NCC = @TenNCC, DIACHI_NCC = @DiaChi, SDT = @SDT, 
-                            EMAIL = @Email, MSTHUE = @MST, GHICHU = @GhiChu
-                        WHERE MA_NCC = @MaNCC";
+                                UPDATE DM_NHACUNGCAP SET
+                                    TEN_NCC = @TenNCC, DIACHI_NCC = @DiaChi, SDT = @SDT, 
+                                    EMAIL = @Email, MSTHUE = @MST, GHICHU = @GhiChu
+                                WHERE MA_NCC = @MaNCC";
                     DbHelper.Execute(query,
                         DbHelper.Param("@TenNCC", txtTenNCC.Texts),
                         DbHelper.Param("@DiaChi", txtDiaChi.Texts),

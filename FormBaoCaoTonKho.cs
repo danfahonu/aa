@@ -8,18 +8,18 @@ using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormBaoCaoTonKho : Form
+    public partial class FormBaoCaoTonKho : BaseForm
     {
         public FormBaoCaoTonKho()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormBaoCaoTonKho_Load(object sender, EventArgs e)
         {
             try
             {
-                ThemeManager.Apply(this);
                 // Khi form load, chạy báo cáo ngay
                 btnXemBaoCao_Click(sender, e);
             }

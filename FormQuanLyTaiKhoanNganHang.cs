@@ -3,29 +3,28 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using DoAnLapTrinhQuanLy.Data;
+using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormQuanLyTaiKhoanNganHang : Form
+    public partial class FormQuanLyTaiKhoanNganHang : BaseForm
     {
         private bool isAdding = false;
-        private int selectedId = -1; // Dùng ID để xác định dòng đang chọn
+        private int selectedId = -1;
 
         public FormQuanLyTaiKhoanNganHang()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormQuanLyTaiKhoanNganHang_Load(object sender, EventArgs e)
         {
             LoadData();
             LoadComboBoxNganHang();
-            // Ban đầu chưa chọn loại TK nên chưa load đối tượng
-            cboLoaiTK.SelectedIndex = -1;
+            // LoadComboBoxDoiTuong will be triggered by cboLoaiTK selection change
             SetInputMode(false);
         }
-
-        #region Xử lý dữ liệu và ComboBox
 
         private void LoadData()
         {
@@ -113,8 +112,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtGhiChu.Text = "";
             selectedId = -1;
         }
-
-        #endregion
 
         #region Quản lý trạng thái giao diện (UX)
 

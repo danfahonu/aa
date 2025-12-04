@@ -15,21 +15,17 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 {
     public partial class FormPhieuNhap : BaseForm
     {
-        private string _mode = "";
+        private DataTable dtChiTiet = new DataTable();
         private long _idYeuCau = 0;
-        private readonly DataTable dtChiTiet;
+        private string _mode = "";
 
         public FormPhieuNhap()
         {
+            InitializeComponent();
+            UseCustomTitleBar = false;
+
             try
             {
-                InitializeComponent();
-                // Double Buffering is handled by BaseForm
-
-                if (dgvChiTiet == null) throw new Exception("dgvChiTiet is null after InitializeComponent");
-
-                // Khởi tạo DataTable chi tiết
-                dtChiTiet = new DataTable();
                 dtChiTiet.Columns.Add("MAHH", typeof(string));
                 dtChiTiet.Columns.Add("TENHH", typeof(string));
                 dtChiTiet.Columns.Add("DVT", typeof(string));
@@ -49,8 +45,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        // CreateParams is handled by BaseForm
-
         private void DtChiTiet_ColumnChanged(object sender, DataColumnChangeEventArgs e)
         {
             // Recalculate Total Amount whenever SL or DONGIA changes
@@ -64,7 +58,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         {
             try
             {
-                // ThemeManager.Apply(this); // Handled by BaseForm
                 this.SuspendLayout();
                 this.Cursor = Cursors.WaitCursor;
 
@@ -188,15 +181,15 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 _idYeuCau = idYeuCau;
 
                 string queryDetail = @"
-                    SELECT 
-                        ct.MAHH, 
-                        hh.TENHH, 
-                        hh.DVT, 
-                        ct.SOLUONG_YEUCAU AS SL,
-                        hh.GIAVON AS DONGIA
-                    FROM PHIEU_YEUCAU_NHAPKHO_CT ct
-                    JOIN DM_HANGHOA hh ON ct.MAHH = hh.MAHH
-                    WHERE ct.ID_YEUCAU = @ID";
+                            SELECT 
+                                ct.MAHH, 
+                                hh.TENHH, 
+                                hh.DVT, 
+                                ct.SOLUONG_YEUCAU AS SL,
+                                hh.GIAVON AS DONGIA
+                            FROM PHIEU_YEUCAU_NHAPKHO_CT ct
+                            JOIN DM_HANGHOA hh ON ct.MAHH = hh.MAHH
+                            WHERE ct.ID_YEUCAU = @ID";
 
                 DataTable dtTemp = DbHelper.Query(queryDetail, DbHelper.Param("@ID", idYeuCau));
 
@@ -322,8 +315,8 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
                 // 4. Insert PHIEU (Master)
                 string sqlPhieu = @"INSERT INTO PHIEU (NGAYLAP, LOAI, MA_NCC, GHICHU, TRANGTHAI, ID_YEUCAU) 
-                                  VALUES (@NGAYLAP, 'N', @MA_NCC, @GHICHU, 1, @ID_YEUCAU);
-                                  SELECT SCOPE_IDENTITY();";
+                                          VALUES (@NGAYLAP, 'N', @MA_NCC, @GHICHU, 1, @ID_YEUCAU);
+                                          SELECT SCOPE_IDENTITY();";
 
                 object result = DbHelper.Scalar(sqlPhieu,
                     DbHelper.Param("@NGAYLAP", dtpNgayLap.Value),
@@ -346,8 +339,8 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                     // a. Insert PHIEU_CT
                     // SQL Safety: Excluded THANHTIEN
                     string sqlChiTiet = @"INSERT INTO PHIEU_CT (SOPHIEU, MAHH, SL, DONGIA) 
-                                        VALUES (@SOPHIEU, @MAHH, @SL, @DONGIA);
-                                        SELECT SCOPE_IDENTITY();";
+                                                VALUES (@SOPHIEU, @MAHH, @SL, @DONGIA);
+                                                SELECT SCOPE_IDENTITY();";
 
                     object resultCT = DbHelper.Scalar(sqlChiTiet,
                         DbHelper.Param("@SOPHIEU", soPhieu),
@@ -360,9 +353,9 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
                     // b. Insert KHO_CHITIET_TONKHO
                     string sqlKho = @"INSERT INTO KHO_CHITIET_TONKHO 
-                                    (ID_PHIEUNHAP_CT, MAHH, NGAY_NHAP, SO_LUONG_NHAP, DON_GIA_NHAP, SO_LUONG_TON)
-                                    VALUES 
-                                    (@ID_PHIEUNHAP_CT, @MAHH, @NGAY_NHAP, @SL, @DONGIA, @SL)";
+                                            (ID_PHIEUNHAP_CT, MAHH, NGAY_NHAP, SO_LUONG_NHAP, DON_GIA_NHAP, SO_LUONG_TON)
+                                            VALUES 
+                                            (@ID_PHIEUNHAP_CT, @MAHH, @NGAY_NHAP, @SL, @DONGIA, @SL)";
 
                     DbHelper.Execute(sqlKho,
                         DbHelper.Param("@ID_PHIEUNHAP_CT", idPhieuCT),

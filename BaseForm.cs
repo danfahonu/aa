@@ -124,62 +124,16 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             }
         }
 
-        protected override void OnLoad(EventArgs e)
+        public bool UseCustomTitleBar { get; set; } = true;
+
+        public void ConfigureAsEmbeddedContent()
         {
-            base.OnLoad(e);
-            if (!DesignMode)
-            {
-                try
-                {
-                    ThemeManager.Apply(this);
-                    // Ensure TitleBar stays on top and styled
-                    pnlTitleBar.SendToBack(); // Dock Top needs to be last in Z-order to be at top? No, usually first. 
-                    // Actually, Dock=Top controls added last are at the bottom. 
-                    // But we added it in Constructor, so it might be covered.
-                    // Let's bring to front to be safe, or ensure it's the first control.
-                    pnlTitleBar.BringToFront();
-                }
-                catch { }
-            }
-        }
-
-        // Resize Logic (Native behavior for borderless forms)
-        protected override void WndProc(ref Message m)
-        {
-            const int WM_NCHITTEST = 0x84;
-            const int RESIZE_HANDLE_SIZE = 10;
-
-            if (m.Msg == WM_NCHITTEST)
-            {
-                base.WndProc(ref m);
-
-                if ((int)m.Result == 0x1) // HTCLIENT
-                {
-                    Point screenPoint = new Point(m.LParam.ToInt32());
-                    Point clientPoint = this.PointToClient(screenPoint);
-
-                    if (clientPoint.Y <= RESIZE_HANDLE_SIZE)
-                    {
-                        if (clientPoint.X <= RESIZE_HANDLE_SIZE) m.Result = (IntPtr)13; // HTTOPLEFT
-                        else if (clientPoint.X < (this.Size.Width - RESIZE_HANDLE_SIZE)) m.Result = (IntPtr)12; // HTTOP
-                        else m.Result = (IntPtr)14; // HTTOPRIGHT
-                    }
-                    else if (clientPoint.Y <= (this.Size.Height - RESIZE_HANDLE_SIZE))
-                    {
-                        if (clientPoint.X <= RESIZE_HANDLE_SIZE) m.Result = (IntPtr)10; // HTLEFT
-                        else if (clientPoint.X < (this.Size.Width - RESIZE_HANDLE_SIZE)) m.Result = (IntPtr)2; // HTCAPTION (Default)
-                        else m.Result = (IntPtr)11; // HTRIGHT
-                    }
-                    else
-                    {
-                        if (clientPoint.X <= RESIZE_HANDLE_SIZE) m.Result = (IntPtr)16; // HTBOTTOMLEFT
-                        else if (clientPoint.X < (this.Size.Width - RESIZE_HANDLE_SIZE)) m.Result = (IntPtr)15; // HTBOTTOM
-                        else m.Result = (IntPtr)17; // HTBOTTOMRIGHT
-                    }
-                }
-                return;
-            }
-            base.WndProc(ref m);
+            UseCustomTitleBar = false;
+            TopLevel = false;
+            FormBorderStyle = FormBorderStyle.None;
+            Dock = DockStyle.Fill;
+            Padding = new Padding(0);
+            Margin = new Padding(0);
         }
     }
 }

@@ -8,12 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Transactions;
 using DoAnLapTrinhQuanLy.Data;
-using System.Transactions; // <-- Thư viện này sẽ OK sau khi bà "Add Reference"
+using DoAnLapTrinhQuanLy.Core;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormYeuCauNhapKho : Form
+    public partial class FormYeuCauNhapKho : BaseForm
     {
         private string _mode = "";
         private DataTable dtChiTiet;
@@ -21,6 +22,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         public FormYeuCauNhapKho()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormYeuCauNhapKho_Load(object sender, EventArgs e)
@@ -32,17 +34,22 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             StyleDataGridView(dgvDanhSach);
             StyleDataGridView(dgvChiTiet);
 
-            btnThem.Click += btnThem_Click;
-            btnSua.Click += btnSua_Click;
-            btnXoa.Click += btnXoa_Click;
-            btnLuu.Click += btnLuu_Click;
-            btnHuy.Click += btnHuy_Click;
-            dgvDanhSach.SelectionChanged += dgvDanhSach_SelectionChanged;
+            // Wire events if not already wired in Designer
+            // We'll rely on Designer or these manual wirings if they were intended
+            // But to be safe, I'll add them here if they aren't duplicates.
+            // Actually, usually these are in Designer.cs. If I add them here, I might duplicate.
+            // But the previous code had them. I'll assume they are needed.
+            btnThem.Click -= btnThem_Click; btnThem.Click += btnThem_Click;
+            btnSua.Click -= btnSua_Click; btnSua.Click += btnSua_Click;
+            btnXoa.Click -= btnXoa_Click; btnXoa.Click += btnXoa_Click;
+            btnLuu.Click -= btnLuu_Click; btnLuu.Click += btnLuu_Click;
+            btnHuy.Click -= btnHuy_Click; btnHuy.Click += btnHuy_Click;
+            // dgvDanhSach.SelectionChanged -= dgvDanhSach_SelectionChanged; dgvDanhSach.SelectionChanged += dgvDanhSach_SelectionChanged;
 
             btnDuyet.Visible = true;
             btnTuChoi.Visible = true;
-            btnDuyet.Click += btnDuyet_Click;
-            btnTuChoi.Click += btnTuChoi_Click;
+            btnDuyet.Click -= btnDuyet_Click; btnDuyet.Click += btnDuyet_Click;
+            btnTuChoi.Click -= btnTuChoi_Click; btnTuChoi.Click += btnTuChoi_Click;
         }
 
         #region Core Logic (SetInputMode và Load)

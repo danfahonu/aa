@@ -2,26 +2,25 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using DoAnLapTrinhQuanLy.Data; // Đảm bảo using này đúng
+using DoAnLapTrinhQuanLy.Data;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormNhomHang : Form
+    public partial class FormNhomHang : BaseForm
     {
         private bool isAdding = false;
 
         public FormNhomHang()
         {
             InitializeComponent();
+            UseCustomTitleBar = false;
         }
 
         private void FormNhomHang_Load(object sender, EventArgs e)
         {
             LoadData();
-            SetInputMode(false); // Khóa giao diện khi mới mở
+            SetInputMode(false);
         }
-
-        #region Xử lý dữ liệu
 
         private void LoadData()
         {
@@ -43,8 +42,6 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             txtTenNhom.Text = "";
             txtGhiChu.Text = "";
         }
-
-        #endregion
 
         #region Quản lý trạng thái giao diện (UX)
 
@@ -124,8 +121,8 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 if (isAdding)
                 {
                     string query = @"
-                        INSERT INTO DM_NHOMHANG (MANHOM, TENNHOM, GHICHU)
-                        VALUES (@MaNhom, @TenNhom, @GhiChu)";
+                                INSERT INTO DM_NHOMHANG (MANHOM, TENNHOM, GHICHU)
+                                VALUES (@MaNhom, @TenNhom, @GhiChu)";
                     DbHelper.Execute(query,
                         DbHelper.Param("@MaNhom", txtMaNhom.Text),
                         DbHelper.Param("@TenNhom", txtTenNhom.Text),
@@ -135,9 +132,9 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 else
                 {
                     string query = @"
-                        UPDATE DM_NHOMHANG SET
-                            TENNHOM = @TenNhom, GHICHU = @GhiChu
-                        WHERE MANHOM = @MaNhom";
+                                UPDATE DM_NHOMHANG SET
+                                    TENNHOM = @TenNhom, GHICHU = @GhiChu
+                                WHERE MANHOM = @MaNhom";
                     DbHelper.Execute(query,
                         DbHelper.Param("@TenNhom", txtTenNhom.Text),
                         DbHelper.Param("@GhiChu", txtGhiChu.Text),

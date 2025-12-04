@@ -10,26 +10,27 @@ using System.Windows.Forms;
 
 namespace DoAnLapTrinhQuanLy.GuiLayer
 {
-    public partial class FormBaoCaoKho : Form
+    public partial class FormBaoCaoKho : BaseForm
     {
         private Button btnPrint;
 
         public FormBaoCaoKho()
         {
             InitializeComponent();
-            ThemeManager.Apply(this);
+            UseCustomTitleBar = false;
+            // ThemeManager.Apply(this); // Handled by BaseForm
             InitializePrintButton();
 
             // Adjust UI for Stock Card
-            this.Text = "Th? Kho (S? Chi Ti?t V?t Tu)";
-            lblDoiTac.Text = "Ch?n H�ng H�a:";
+            this.Text = "Thẻ Kho (Sổ Chi Tiết Vật Tư)";
+            lblDoiTac.Text = "Chọn Hàng Hóa:";
             chkXemChiTiet.Visible = false; // Stock Card is always detailed
         }
 
         private void InitializePrintButton()
         {
             btnPrint = new Button();
-            btnPrint.Text = "In Th? Kho";
+            btnPrint.Text = "In Thẻ Kho";
             btnPrint.Size = new Size(120, 34);
             btnPrint.Location = new Point(btnXemBaoCao.Location.X + btnXemBaoCao.Width + 10, btnXemBaoCao.Location.Y);
             btnPrint.Click += BtnPrint_Click;
@@ -76,7 +77,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         {
             if (cboDoiTac.SelectedValue == null)
             {
-                MessageBox.Show("Vui l�ng ch?n h�ng h�a d? xem th? kho.", "Th�ng b�o");
+                MessageBox.Show("Vui lòng chọn hàng hóa để xem thẻ kho.", "Thông báo");
                 return;
             }
 
@@ -86,7 +87,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
             try
             {
-                // 1. Calculate Opening Stock (T?n �?u)
+                // 1. Calculate Opening Stock (Tồn Đầu)
                 string sqlTonDau = @"
                     SELECT 
                         (SELECT ISNULL(SUM(ct.SL), 0) 
@@ -110,7 +111,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                         p.NGAYLAP,
                         p.SOPHIEU,
                         p.LOAI,
-                        CASE WHEN p.LOAI = 'N' THEN N'Nh?p' ELSE N'Xu?t' END AS DIENGIAI,
+                        CASE WHEN p.LOAI = 'N' THEN N'Nhập' ELSE N'Xuất' END AS DIENGIAI,
                         ct.SL,
                         ct.DONGIA
                     FROM PHIEU p 
@@ -128,15 +129,15 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
 
                 // 3. Process Data
                 DataTable dtResult = new DataTable();
-                dtResult.Columns.Add("Ng�y", typeof(DateTime));
-                dtResult.Columns.Add("S? Phi?u");
-                dtResult.Columns.Add("Di?n Gi?i");
-                dtResult.Columns.Add("Nh?p", typeof(int));
-                dtResult.Columns.Add("Xu?t", typeof(int));
-                dtResult.Columns.Add("T?n", typeof(int));
+                dtResult.Columns.Add("Ngày", typeof(DateTime));
+                dtResult.Columns.Add("Số Phiếu");
+                dtResult.Columns.Add("Diễn Giải");
+                dtResult.Columns.Add("Nhập", typeof(int));
+                dtResult.Columns.Add("Xuất", typeof(int));
+                dtResult.Columns.Add("Tồn", typeof(int));
 
                 // Add Opening Row
-                dtResult.Rows.Add(tuNgay, "", "S? du d?u k?", 0, 0, tonDau);
+                dtResult.Rows.Add(tuNgay, "", "Số dư đầu kỳ", 0, 0, tonDau);
 
                 int tonHienTai = tonDau;
                 int tongNhap = 0;
@@ -168,11 +169,11 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 FormatGrid();
 
                 // Update Status
-                staTongTien.Text = $"T?n d?u: {tonDau:N0} | Nh?p: {tongNhap:N0} | Xu?t: {tongXuat:N0} | T?n cu?i: {tonHienTai:N0}";
+                staTongTien.Text = $"Tồn đầu: {tonDau:N0} | Nhập: {tongNhap:N0} | Xuất: {tongXuat:N0} | Tồn cuối: {tonHienTai:N0}";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("L?i t?i th? kho: " + ex.Message, "L?i");
+                MessageBox.Show("Lỗi tải thẻ kho: " + ex.Message, "Lỗi");
             }
         }
 
@@ -183,12 +184,12 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             var numberFormat = new DataGridViewCellStyle { Format = "N0", Alignment = DataGridViewContentAlignment.MiddleRight };
             var boldFont = new Font("Segoe UI", 9F, FontStyle.Bold);
 
-            gridBaoCao.Columns["Nh?p"].DefaultCellStyle = numberFormat;
-            gridBaoCao.Columns["Xu?t"].DefaultCellStyle = numberFormat;
-            gridBaoCao.Columns["T?n"].DefaultCellStyle = numberFormat;
-            gridBaoCao.Columns["T?n"].DefaultCellStyle.Font = boldFont;
+            gridBaoCao.Columns["Nhập"].DefaultCellStyle = numberFormat;
+            gridBaoCao.Columns["Xuất"].DefaultCellStyle = numberFormat;
+            gridBaoCao.Columns["Tồn"].DefaultCellStyle = numberFormat;
+            gridBaoCao.Columns["Tồn"].DefaultCellStyle.Font = boldFont;
 
-            gridBaoCao.Columns["Di?n Gi?i"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            gridBaoCao.Columns["Diễn Giải"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             gridBaoCao.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
         }
 
@@ -216,7 +217,7 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             // float margin = 50; // Removed unused variable
 
             // Title
-            string title = "TH? KHO";
+            string title = "THẺ KHO";
             SizeF titleSize = g.MeasureString(title, titleFont);
             g.DrawString(title, titleFont, Brushes.Black, (e.PageBounds.Width - titleSize.Width) / 2, y);
             y += 30;
@@ -227,14 +228,14 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
             g.DrawString(subTitle, headerFont, Brushes.Black, (e.PageBounds.Width - subSize.Width) / 2, y);
             y += 30;
 
-            string dateRange = $"T? ng�y {dtpTuNgay.Value:dd/MM/yyyy} d?n ng�y {dtpDenNgay.Value:dd/MM/yyyy}";
+            string dateRange = $"Từ ngày {dtpTuNgay.Value:dd/MM/yyyy} đến ngày {dtpDenNgay.Value:dd/MM/yyyy}";
             SizeF dateSize = g.MeasureString(dateRange, contentFont);
             g.DrawString(dateRange, contentFont, Brushes.Black, (e.PageBounds.Width - dateSize.Width) / 2, y);
             y += 40;
 
             // Table Header
             float[] colWidths = { 100, 100, 150, 80, 80, 80 };
-            string[] headers = { "Ng�y", "S? Phi?u", "Di?n Gi?i", "Nh?p", "Xu?t", "T?n" };
+            string[] headers = { "Ngày", "Số Phiếu", "Diễn Giải", "Nhập", "Xuất", "Tồn" };
             float x = (e.PageBounds.Width - 600) / 2; // Center table (approx width 600)
 
             for (int i = 0; i < headers.Length; i++)
@@ -254,15 +255,15 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
                 {
                     x = (e.PageBounds.Width - 600) / 2;
 
-                    string ngay = row["Ng�y"] != DBNull.Value ? Convert.ToDateTime(row["Ng�y"]).ToString("dd/MM/yyyy") : "";
+                    string ngay = row["Ngày"] != DBNull.Value ? Convert.ToDateTime(row["Ngày"]).ToString("dd/MM/yyyy") : "";
 
                     string[] values = {
                         ngay,
-                        row["S? Phi?u"].ToString(),
-                        row["Di?n Gi?i"].ToString(),
-                        Convert.ToInt32(row["Nh?p"]).ToString("N0"),
-                        Convert.ToInt32(row["Xu?t"]).ToString("N0"),
-                        Convert.ToInt32(row["T?n"]).ToString("N0")
+                        row["Số Phiếu"].ToString(),
+                        row["Diễn Giải"].ToString(),
+                        Convert.ToInt32(row["Nhập"]).ToString("N0"),
+                        Convert.ToInt32(row["Xuất"]).ToString("N0"),
+                        Convert.ToInt32(row["Tồn"]).ToString("N0")
                     };
 
                     float rowHeight = 25;
