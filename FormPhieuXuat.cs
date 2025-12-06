@@ -31,6 +31,19 @@ namespace DoAnLapTrinhQuanLy.GuiLayer
         {
             try
             {
+                // Fix Button Layout (Ensure they are visible, right-aligned, and vertically centered)
+                int rightMargin = 20;
+                int spacing = 15;
+                int footerHeight = pnlFooter.Height;
+                int btnY = (footerHeight - btnHuy.Height) / 2;
+
+                // Order from Right: Huy -> In -> Luu -> Them (Match PhieuNhap Order: Huy(Right) -> In -> Luu -> Them)
+
+                btnHuy.Location = new Point(pnlFooter.Width - btnHuy.Width - rightMargin, btnY);
+                btnIn.Location = new Point(btnHuy.Left - btnIn.Width - spacing, btnY);
+                btnLuu.Location = new Point(btnIn.Left - btnLuu.Width - spacing, btnY);
+                btnThem.Location = new Point(btnLuu.Left - btnThem.Width - spacing, btnY);
+
                 LoadComboBoxes();
                 LoadHangHoa();
                 ResetForm();

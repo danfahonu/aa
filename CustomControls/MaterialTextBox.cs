@@ -193,6 +193,13 @@ namespace DoAnLapTrinhQuanLy.Controls
         }
 
         [Category("Material Code Advance")]
+        public override string Text
+        {
+            get { return Texts; }
+            set { Texts = value; }
+        }
+
+        [Category("Material Code Advance")]
         public int BorderRadius
         {
             get { return borderRadius; }
@@ -228,6 +235,12 @@ namespace DoAnLapTrinhQuanLy.Controls
                 textBox1.Text = "";
                 SetPlaceholder();
             }
+        }
+
+        public void Clear()
+        {
+            textBox1.Clear();
+            this.Texts = "";
         }
 
         private void SetPlaceholder()
